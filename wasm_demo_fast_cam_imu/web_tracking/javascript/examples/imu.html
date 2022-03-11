@@ -1,0 +1,88 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="Stylesheet" href="style.css" type="text/css">
+  <title>IMU Example</title>
+</head>
+<body>
+  <header><h1>IMU Example</h1></header>
+  <p id="gyro"></p>
+  <p id="accel"></p>
+  <p id="imu"></p>
+  <script src="./imu_event.js"></script>
+  <script>
+    let gyroscope = new Gyroscope({frequency: 60});
+    let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
+    let gyroInfo=``;
+    gyroscope.addEventListener('reading', e => {
+      gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      if (gyro_cnt > 0) {
+        gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
+        // gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
+        //             Frequency: ${gyro_hz.toFixed(3)} Hz
+        //             Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}
+        //             sensor.timestamp: ${(gyroscope.timestamp/1000).toFixed(6)}
+        //             performance.now(): ${(performance.now()/1000).toFixed(6)}
+        //             Date.now(): ${(Date.now()/1000).toFixed(6)}`;
+        gyroInfo += `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
+                    Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}\n`;
+        if (gyro_cnt % 15 === 0) {
+          // document.getElementById("gyro").innerText = gyroInfo;
+          gyroInfo = ``;
+        }
+      } else {
+        gyro_timestamp_start = performance.now();
+      }
+      gyro_cnt += 1;
+    });
+    gyroscope.start();
+
+    let accelscope = new Accelerometer({frequency: 60});
+    let accel_timestamp_start, accel_timestamp, accel_hz, accel_cnt=0;
+    let accelInfo=``;
+    accelscope.addEventListener('reading', e => {
+      accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      if (accel_cnt > 0) {
+        accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
+        // accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(6)} ms
+        //             Frequency: ${accel_hz.toFixed(3)} Hz
+        //             Data: ${accelscope.x.toFixed(3)}, ${accelscope.y.toFixed(3)}, ${accelscope.z.toFixed(3)}
+        //             sensor.timestamp: ${(accelscope.timestamp/1000).toFixed(6)}
+        //             performance.now(): ${(performance.now()/1000).toFixed(6)}
+        //             Date.now(): ${(Date.now()/1000).toFixed(6)}`;
+        accelInfo += `Accel Timestamp: ${accel_timestamp.toFixed(6)} ms
+                    Data: ${accelscope.x.toFixed(3)}, ${accelscope.y.toFixed(3)}, ${accelscope.z.toFixed(3)}\n`;
+        if (accel_cnt % 15 === 0) {
+          document.getElementById("accel").innerText = accelInfo;
+          accelInfo = ``;
+        }
+      } else {
+        accel_timestamp_start = performance.now();
+      }
+      accel_cnt += 1;
+    });
+    accelscope.start();
+
+    let imu_timestamp_start, imu_timestamp, imu_hz, imu_cnt=0;
+    // let imuInfo = ``;
+    imu.startTracking(function (o) {
+      imu_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      if (imu_cnt > 0) {
+        imu_hz = 1000 * imu_cnt / (performance.now() - imu_timestamp_start);
+        imuInfo = `IMU imestamp: ${imu_timestamp.toFixed(6)} ms</br>
+                  Frequency: ${imu_hz.toFixed(3)} Hz, delta_t: ${o.delta_t} ms</br>
+                  Accel: ${o.ax.toFixed(3)}, ${o.ay.toFixed(3)}, ${o.az.toFixed(3)}</br>
+                  EularRate: ${o.wx.toFixed(3)}, ${o.wy.toFixed(3)}, ${o.wz.toFixed(3)}</br>
+                  Eular: ${o.alpha.toFixed(3)}, ${o.beta.toFixed(3)}, ${o.gamma.toFixed(3)}</br>`;
+        // document.getElementById('imu').innerHTML = imuInfo;
+        // if (imu_cnt % 10 === 0) {
+        //   imuInfo = ``;
+        // }
+      } else {
+        imu_timestamp_start = performance.now();
+      }
+      imu_cnt += 1;
+    });
+  </script>
+</body>
+</html>

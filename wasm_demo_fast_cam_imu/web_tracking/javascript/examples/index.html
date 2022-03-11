@@ -1,0 +1,254 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="Stylesheet" href="style.css" type="text/css">
+  <title>Web Tracking Example</title>
+</head>
+<body>
+  <header><h1>Web Tracking Example</h1></header>
+  <div id="statsContainer"></div>
+  <button id = "webcamButton" onclick="webcamToggle()">Switch to Webcam</button>
+  <p id="img"></p>
+  <p id="gyro"></p>
+  <p id="accel"></p>
+  <p id="stats">Loading..</p>
+  <p id="avg"></p>
+  <div id = 'editor'>
+    <div id = 'middle-col'>
+      <canvas id="c" width="720" height="486"></canvas>
+      <video id="v" loop="false" autoplay style="display:none;" src="video/chenjing_beijing.mp4" type="video/mp4"></video>
+      <div id = "controls">
+        <div>
+          <button id = "playButton" onclick="playToggle()"><img id = "playImg" alt = "Play Button" src = "img/play1.svg"></button>
+        </div>
+        <h1 id = "vidTime">00:00:00:00</h1>
+        <div>
+          <button id = "loopButton" onclick="loopToggle()"><img id = "loopImg" alt = "Loop On Off" src = "img/noloop1.svg"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </br>
+  <script src="../dist/wasm/umd/index.js"></script>
+  <script>
+    let media = 'video';
+    let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
+    let image_timestamp_start, image_timestamp, fps, image_cnt=0;
+    let pixels, cw, ch;
+    let imgInfo, gyroInfo, accelInfo;
+    let avgDisplay = document.getElementById('avg');
+    let web_tracking_module;
+    let img_processor;
+    let imgproc_HEAPU8;
+
+    //wasm video
+    var vid = document.getElementById('v');
+    var canvas = document.getElementById('c');
+    var context = canvas.getContext('2d');
+    (async () => {
+      // Wait for the library to initialize
+      web_tracking_module = await WebTracking();
+      vid.addEventListener("loadeddata", function() {
+        canvas.setAttribute('height', vid.videoHeight);
+        canvas.setAttribute('width', vid.videoWidth);
+        cw = canvas.clientWidth; //usually same as canvas.height
+        ch = canvas.clientHeight;
+        img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
+        imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
+        draw();
+        timeData();
+        appendWasmCheck();
+        eigenTest();
+        gyroInit();
+        accelInit();
+      });
+    })();
+    // var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10, max: 15 } } };
+    function webcamToggle() {
+      media = media === 'video' ? 'webcam' : 'video';
+      if(media==='webcam') {
+        controlContent = document.getElementById('controls').innerHTML;
+        document.getElementById('webcamButton').innerHTML = 'Switch to Video';
+        navigator.mediaDevices.getUserMedia({video:{facingMode: "environment"}, audio: false})
+            .then((stream) => {
+                vid.srcObject = stream;
+                document.getElementById('controls').innerHTML = "Switch back to video for player controls";
+            })
+            .catch(function(err) {
+                media = 'video';
+                alert(err.name);
+            });
+      }
+      else {
+        document.getElementById('controls').innerHTML = controlContent;
+        document.getElementById('webcamButton').innerHTML = 'Switch to Webcam';
+        vid.srcObject = null;
+      } 
+    }
+
+    function draw() {
+      if (vid.paused) return false;
+      context.drawImage(vid, 0, 0);
+      // console.log(vid.videoWidth+"_"+vid.videoHeight);
+      // console.log('check', vid, context);
+      pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+      image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      t0 = performance.now();
+      pixels.data.set(detectFastCorner(pixels.data, cw, ch));
+      t1 = performance.now();
+      context.putImageData(pixels, 0, 0);
+      perf = t1 - t0;
+      sum += perf;
+      if (image_cnt > 0) {
+        fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
+        imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${fps.toFixed(2)}`;
+        document.getElementById("img").innerText = imgInfo;
+        perfStr = perf.toString().slice(0, 4);
+        wasmStats = `WASM computation time: ${perfStr} ms`;
+        document.getElementById("stats").innerText = wasmStats;
+      } else {
+        image_timestamp_start = performance.now();
+      }
+      if (image_cnt % 10 === 0) {
+        avg = sum / image_cnt;
+        avgDisplay.innerText = `Average computation time WASM: ${avg.toString().slice(0, 4)} ms`;
+      }
+      image_cnt += 1;
+
+      requestAnimationFrame(draw); 
+    }
+
+    //case for when loop is off and video pauses at end without someone clicking play button
+    vid.onpause = () => document.getElementById('playImg').setAttribute('src', 'img/play1.svg');
+
+    function playToggle () { //does both vids together
+      if (vid.paused) {
+        document.getElementById('playImg').setAttribute('src', 'img/pause1.svg')
+        vid.play();
+        draw();
+      }
+      else {
+        document.getElementById('playImg').setAttribute('src', 'img/play1.svg')
+        vid.pause()
+      }
+    }
+
+    function loopToggle () { //does both vids together
+      if (vid.hasAttribute('loop')){
+        document.getElementById('loopImg').setAttribute('src', 'img/loop1.svg')
+        vid.removeAttribute('loop')
+      }
+      else {
+        if (vid.paused) {
+          playToggle();
+        }
+        document.getElementById('loopImg').setAttribute('src', 'img/noloop1.svg')
+        vid.setAttribute('loop', 'true')
+      }
+    }
+
+    function timeData () {
+      //FrameNum in Time div, and then time in Canvas div;
+      //Can put total frames next to video length; 
+      let vidTime = document.getElementById('vidTime');
+      function getTimeCode(microseconds) {
+        let hours = Math.floor(microseconds / 3600);
+        if (hours < 10) hours = '0' + hours;
+        let minutes = Math.floor(microseconds/ 60);
+        if (minutes < 10) minutes = '0' + minutes;
+        let seconds = Math.floor(microseconds);
+        if (seconds < 10) seconds = '0' + seconds;
+        let milliseconds = microseconds - seconds;
+        milliseconds = String(milliseconds).slice(2,4);
+        return result = `${String(hours)} : ${String(minutes)} : ${String(seconds)} : ${String(milliseconds)}`;
+      }
+      //add thing for frameNum;  
+      vidTime.innerHTML = `${getTimeCode(vid.currentTime)}`;
+      setTimeout(timeData,15);
+    }
+
+    function appendWasmCheck () {
+      if ('WebAssembly' in window) {
+        document.getElementById('statsContainer').innerHTML = `(\u2713 WebAssembly is supported in your browser)`
+      }
+      else if (/Mobi/.test(navigator.userAgent)) {
+        document.getElementById('statsContainer').innerHTML = `<h3 style="color:#a37c6e;">\u2639 WebAssembly is not yet supported on mobile devices. Please view on desktop browser.</h3>`
+      }
+      else {
+        document.getElementById('statsContainer').innerHTML = `<h3 style="color:#a37c6e;">\u2639 WebAssembly is not supported in your browser. Please update to the latest version of Chrome or Firefox to enable WebAssembly</h3>`
+      }
+    }
+
+    function eigenTest() {
+      let q_array = [0.99894403, -0.00045966289, -0.045835741, 0.0031135603];
+      let angle_vector = web_tracking_module.MatrixProc.AngleVectorFromRotation(q_array);
+      for (var i = 0; i < angle_vector.size(); i++) 
+      { 
+        console.log(angle_vector.get(i));
+      }
+
+      let size = 9;
+      let res_array = [0.14740699, -2.3008106, -0.14179067, -1.642709, -0.087483585, -1.1038882, 0.088762618, -0.20561008, 0.2652723];
+      let S_array = [47.43882, -19.394628,  35.115914, -24.109937,   20.93693, -24.344906,  12.571666, -18.995493, -15.804585,
+                   -19.394628,  195.90506, -26.512773,  159.49212, -33.557157,  122.85588,  -37.92472,  83.965011,  53.268423,
+                    35.115914, -26.512773,  29.936722, -29.362635,  18.750332, -28.247698,  12.663787,  -21.77703, -17.438169,
+                   -24.109937,  159.49212, -29.362635,  135.61078, -32.344451,  106.85348, -34.346363,  74.671888,  49.191292,
+                     20.93693, -33.557157,  18.750332, -32.344451,  14.927402, -28.557874,  11.081678, -21.200425, -15.727509,
+                   -24.344906,  122.85588, -28.247698,  106.85348, -28.557874,  88.212634, -28.969528,  62.159677,  42.260373,
+                    12.571666,  -37.92472,  12.663787, -34.346363,  11.081678, -28.969528,  11.231062, -21.057158, -14.836223,
+                   -18.995493,  83.965011,  -21.77703,  74.671888, -21.200425,  62.159677, -21.057158,  45.925328,  31.154471,
+                   -15.804585,  53.268423, -17.438169,  49.191292, -15.727509,  42.260373, -14.836223,  31.154471,  23.305918];
+      let chi2 = web_tracking_module.MatrixProc.Chi2(size, res_array, S_array);
+      console.log(chi2);
+    }
+
+    function detectFastCorner(data, cw, ch) {
+      const len = data.length;
+      const mem = web_tracking_module.ImgProc.malloc(len);
+      imgproc_HEAPU8.set(data, mem);
+      img_processor.detectFastCorner(mem, cw, ch);
+      const filtered = imgproc_HEAPU8.subarray(mem, mem + len);
+      web_tracking_module.ImgProc.free(mem);
+      return filtered;
+    }
+
+    function gyroInit() {
+      let gyroscope = new Gyroscope({frequency: 60});
+      let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
+      gyroscope.addEventListener('reading', e => {
+        gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+        if (gyro_cnt > 0) {
+          gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
+          gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
+                      Frequency: ${gyro_hz.toFixed(3)} Hz
+                      Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}`;
+          document.getElementById("gyro").innerText = gyroInfo;
+        } else {
+          gyro_timestamp_start = performance.now();
+        }
+        gyro_cnt += 1;
+      });
+      gyroscope.start();
+    }
+
+    function accelInit() {
+      let accelscope = new Accelerometer({frequency: 60});
+      let accel_timestamp_start, accel_timestamp, accel_hz, accel_cnt=0;
+      accelscope.addEventListener('reading', e => {
+        accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+        if (accel_cnt > 0) {
+          accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
+          accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(6)} ms
+                      Frequency: ${accel_hz.toFixed(3)} Hz
+                      Data: ${accelscope.x.toFixed(3)}, ${accelscope.y.toFixed(3)}, ${accelscope.z.toFixed(3)}`;
+          document.getElementById("accel").innerText = accelInfo;
+        } else {
+          accel_timestamp_start = performance.now();
+        }
+        accel_cnt += 1;
+      });
+      accelscope.start();
+    }
+  </script>
+</body>
+</html>

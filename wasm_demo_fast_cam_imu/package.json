@@ -1,0 +1,18 @@
+{
+  "name": "web_tracking",
+  "version": "1.0.0",
+  "description": "Fast+KLT tracking",
+  "main": "./web_tracking/javascript/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "bash ./web_tracking/javascript/scripts/build_wasm.sh && npm run build:copy",
+    "build:copy": "bash ./web_tracking/javascript/scripts/build_copy.sh",
+    "clean": "bazel clean --expunge && rm -rf ./web_tracking/javascript/bin/* && rm -rf ./web_tracking/javascript/dist/*",
+    "prerollup": "rm -rf ./web_tracking/javascript/bin/* && rm -rf ./web_tracking/javascript/dist/* && npm run build:copy",
+    "rollup": "rollup -c"
+  },
+  "devDependencies": {
+    "rollup": "^2.70.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}
