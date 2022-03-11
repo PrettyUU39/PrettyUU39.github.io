@@ -95,8 +95,8 @@
         document.getElementById('controls').innerHTML = controlContent;
         document.getElementById('webcamButton').innerHTML = 'Switch to Webcam';
         vid.srcObject = null;
-        // vid.src = "video/chenjing_beijing.mp4";
         vid.play();
+        document.getElementById('playImg').setAttribute('src', 'img/pause1.svg')
       } 
     }
 
