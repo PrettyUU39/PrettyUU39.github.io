@@ -79,7 +79,12 @@
         //   }
         navigator.mediaDevices.getUserMedia({video:{facingMode: 'environment'}, audio: false})
             .then((stream) => {
+              if('srcObject'in video){
                 vid.srcObject = stream;
+              }
+              else{
+                vid.src = URL.createObjectURL(mediaStream);
+              }
                 vid.play();
                 document.getElementById('controls').innerHTML = "Switch back to video for player controls";
             })
