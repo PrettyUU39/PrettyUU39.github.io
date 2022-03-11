@@ -77,9 +77,10 @@
         //           facingMode: 'environment',
         //       }
         //   }
-        navigator.mediaDevices.getUserMedia({video:{facingMode: "environment"}, audio: false})
+        navigator.mediaDevices.getUserMedia({video:{facingMode: 'environment'}, audio: false})
             .then((stream) => {
                 vid.srcObject = stream;
+                vid.play();
                 document.getElementById('controls').innerHTML = "Switch back to video for player controls";
             })
             .catch(function(err) {
