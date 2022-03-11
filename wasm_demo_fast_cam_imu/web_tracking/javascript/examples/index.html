@@ -67,7 +67,6 @@
     function webcamToggle() {
       media = media === 'video' ? 'webcam' : 'video';
       if(media==='webcam') {
-        vid.play();
         controlContent = document.getElementById('controls').innerHTML;
         document.getElementById('webcamButton').innerHTML = 'Switch to Video';
         // navigator.mediaDevices.enumerateDevices().then(function(devices){
@@ -81,6 +80,8 @@
         navigator.mediaDevices.getUserMedia({video:{facingMode: 'environment'}, audio: false})
             .then((stream) => {
                 vid.srcObject = stream;
+                vid.play();
+                draw();
                 document.getElementById('controls').innerHTML = "Switch back to video for player controls";
             })
             .catch(function(err) {
