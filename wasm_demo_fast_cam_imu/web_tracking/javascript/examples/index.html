@@ -69,14 +69,14 @@
       if(media==='webcam') {
         controlContent = document.getElementById('controls').innerHTML;
         document.getElementById('webcamButton').innerHTML = 'Switch to Video';
-        navigator.mediaDevices.enumerateDevices().then(function(devices){
+        // navigator.mediaDevices.enumerateDevices().then(function(devices){
 
-          var userMediaConstraints = {
-              audio: false,
-              video: {
-                  facingMode: 'environment',
-              }
-          }
+        //   var userMediaConstraints = {
+        //       audio: false,
+        //       video: {
+        //           facingMode: 'environment',
+        //       }
+        //   }
         navigator.mediaDevices.getUserMedia({video:{facingMode: "environment"}, audio: false})
             .then((stream) => {
                 vid.srcObject = stream;
@@ -86,10 +86,10 @@
                 media = 'video';
                 alert(err.name);
             });
-      }).catch(function(err) {
-                media = 'video';
-                alert(err.name);
-      });
+      // }).catch(function(err) {
+      //           media = 'video';
+      //           alert(err.name);
+      // });
     }
       else {
         document.getElementById('controls').innerHTML = controlContent;
