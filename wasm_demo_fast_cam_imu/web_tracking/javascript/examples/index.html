@@ -162,9 +162,6 @@
     function timeData () {
       //FrameNum in Time div, and then time in Canvas div;
       //Can put total frames next to video length; 
-      if(media==='webcam'){
-        return;
-      }
       let vidTime = document.getElementById('vidTime');
       function getTimeCode(microseconds) {
         let hours = Math.floor(microseconds / 3600);
