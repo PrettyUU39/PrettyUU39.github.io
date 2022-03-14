@@ -97,8 +97,8 @@
       }
       context.drawImage(vid, 0, 0);
       // console.log(vid.videoWidth+"_"+vid.videoHeight);
-      console.log('check', vid, context);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+      console.log('check', pixels);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       t0 = performance.now();
       pixels.data.set(detectFastCorner(pixels.data, cw, ch));
