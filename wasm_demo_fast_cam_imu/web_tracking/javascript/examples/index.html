@@ -16,7 +16,7 @@
   <div id = 'editor'>
     <div id = 'middle-col'>
       <canvas id="c" width="720" height="486"></canvas>
-      <video playsinline  id="v" loop autoplay style="display:none;" src="video/chenjing_beijing.mp4" type="video/mp4"></video>
+      <video muted playsinline  id="v" loop autoplay style="display:none;" src="video/chenjing_beijing.mp4" type="video/mp4"></video>
       <div id = "controls">
         <div>
           <button id = "playButton" onclick="playToggle()"><img id = "playImg" alt = "Play Button" src = "img/play1.svg"></button>
@@ -55,12 +55,7 @@
         ch = canvas.clientHeight;
         img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
         imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
-        draw();
-        timeData();
-        appendWasmCheck();
-        eigenTest();
-        gyroInit();
-        accelInit();
+        draw();console.log(vid.videoWidth+"_"+vid.videoHeight);
       });
     })();
     // var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10, max: 15 } } };
@@ -103,7 +98,7 @@
     function draw() {
       if (vid.paused) return false;
       context.drawImage(vid, 0, 0);
-      // console.log(vid.videoWidth+"_"+vid.videoHeight);
+      console.log(vid.videoWidth+"_"+vid.videoHeight);
       // console.log('check', vid, context);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
