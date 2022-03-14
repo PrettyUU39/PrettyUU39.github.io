@@ -34,7 +34,7 @@
     let media = 'video';
     let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt=0;
-    let pixels, cw, ch;
+    let pixels, oldpixels, cw, ch;
     let imgInfo, gyroInfo, accelInfo;
     let avgDisplay = document.getElementById('avg');
     let web_tracking_module;
@@ -89,7 +89,7 @@
         document.getElementById('playImg').setAttribute('src', 'img/pause1.svg')
       } 
     }
-
+    oldpixels = null;
     function draw() {
       if (vid.paused&&media==='video') return false;
       else if(media === 'webcam'){
@@ -98,7 +98,14 @@
       context.drawImage(vid, 0, 0);
       // console.log(vid.videoWidth+"_"+vid.videoHeight);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      console.log('check', pixels);
+      if(oldpixels.data === pixels.data){
+        console.log('same');
+      }
+      else{
+        console.log(image_cnt)
+        oldpixels= pixels;
+      }
+      // console.log('check', pixels);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       t0 = performance.now();
       pixels.data.set(detectFastCorner(pixels.data, cw, ch));
