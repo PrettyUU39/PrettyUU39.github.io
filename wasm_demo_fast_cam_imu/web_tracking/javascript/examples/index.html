@@ -29,6 +29,12 @@
     </div>
   </div>
   </br>
+<script src="https://cdn.bootcss.com/vConsole/3.2.0/vconsole.min.js"></script>
+<script>
+      let vConsole = new VConsole();
+      console.log('test');
+</script>
+
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
     let media = 'video';
@@ -41,7 +47,7 @@
     let img_processor;
     let imgproc_HEAPU8;
     let psum;
-    let myimgcnt;
+    let myimgcnt = 0;
 
     //wasm video
     var vid = document.getElementById('v');
@@ -81,7 +87,7 @@
                 if (videoTracks.length) {
                     videoTrack = videoTracks[0];
                 }
-                console.log(videoTrack.getSettings());
+                console.log(videoTrack.getCapabilities());
                 document.getElementById('controls').innerHTML = "Switch back to video for player controls";
             })
             .catch(function(err) {
@@ -109,18 +115,19 @@
       if(media === 'webcam'){
         if(oldpixels === undefined){
           oldpixels = pixels;
+          myimgcnt=myimgcnt+1;
         }
         psum = 0
         for (let i = 0; i < pixels.data.length; i++) {
           let temp = oldpixels.data[i]-pixels.data[i]
-          psum = temp + psum;
+          psum +=temp;
         }
         if (psum === 0){
           console.log('same');
         }
         else{
-          console.log(oldpixels.data, pixels.data);
           oldpixels.data.set(pixels.data);
+          myimgcnt+=1;
         }
       }
       // console.log('check', pixels);
@@ -133,7 +140,8 @@
       sum += perf;
       if (image_cnt > 0) {
         fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
-        imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${fps.toFixed(2)}`;
+        myfps = 1000 * myimgcnt / (performance.now() - image_timestamp_start);
+        imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${myfps.toFixed(2)}`;
         document.getElementById("img").innerText = imgInfo;
         perfStr = perf.toString().slice(0, 4);
         wasmStats = `WASM computation time: ${perfStr} ms`;
