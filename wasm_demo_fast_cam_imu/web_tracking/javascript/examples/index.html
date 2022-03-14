@@ -143,7 +143,7 @@
       context.putImageData(pixels, 0, 0);
       perf = t1 - t0;
       sum += perf;
-      if (image_cnt > 0 || myimgcnt > 1) {
+      if (image_cnt > 0 && myimgcnt > 1) {
         fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
         myfps = 1000 * myimgcnt / (performance.now() - image_timestamp_start);
         if(media === 'webcam'){
