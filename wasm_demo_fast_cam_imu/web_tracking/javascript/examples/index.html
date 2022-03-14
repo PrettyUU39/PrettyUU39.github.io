@@ -65,7 +65,7 @@
       });
     })();
 
-    var constraints = { video: { facingMode: "environment" , width: 640, height: 480, frameRate: { ideal: 40, max: 60} }, audio: false};
+    var constraints = { video: { facingMode: "environment" , width: 640, height: 480, frameRate: { ideal: 5, max: 10} }, audio: false};
     function webcamToggle() {
       media = media === 'video' ? 'webcam' : 'video';
       if(media==='webcam') {
@@ -122,7 +122,7 @@
       }
       image_cnt += 1;
 
-      requestAnimationFrame(draw); 
+      // requestAnimationFrame(draw); 
     }
 
     //case for when loop is off and video pauses at end without someone clicking play button

@@ -1,0 +1,9 @@
+ios related:
+add playsinline to forbidden auto play
+fix loop
+logerror when switch to cam(inner html)
+ios can't autoplay so change draw function
+when switch back to video can't autoplay so change toggle function
+img wrong when switch back to video
+
+framerate related:
