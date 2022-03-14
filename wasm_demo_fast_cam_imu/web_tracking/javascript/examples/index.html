@@ -104,20 +104,22 @@
       context.drawImage(vid, 0, 0);
       // console.log(vid.videoWidth+"_"+vid.videoHeight);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      if(oldpixels === undefined){
-        oldpixels = pixels;
-      }
-      psum = 0
-      for (let i = 0; i < pixels.data.length; i++) {
-        let temp = oldpixels.data[i]-pixels.data[i]
-        psum = temp + psum;
-      }
-      if (psum === 0){
-        console.log('same');
-      }
-      else{
-        console.log(oldpixels.data, pixels.data);
-        oldpixels.data.set(pixels.data);
+      if(media === 'webcam'){
+        if(oldpixels === undefined){
+          oldpixels = pixels;
+        }
+        psum = 0
+        for (let i = 0; i < pixels.data.length; i++) {
+          let temp = oldpixels.data[i]-pixels.data[i]
+          psum = temp + psum;
+        }
+        if (psum === 0){
+          console.log('same');
+        }
+        else{
+          console.log(oldpixels.data, pixels.data);
+          oldpixels.data.set(pixels.data);
+        }
       }
       // console.log('check', pixels);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
