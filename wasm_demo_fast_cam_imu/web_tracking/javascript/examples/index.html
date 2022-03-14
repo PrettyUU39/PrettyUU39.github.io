@@ -16,7 +16,7 @@
   <div id = 'editor'>
     <div id = 'middle-col'>
       <canvas id="c" width="720" height="486"></canvas>
-      <video playsinline autoplay muted id="v" loop style="display:none;" src="video/chenjing_beijing.mp4" type="video/mp4"></video>
+      <video playsinline  id="v" loop autoplay style="display:none;" src="video/chenjing_beijing.mp4" type="video/mp4"></video>
       <div id = "controls">
         <div>
           <button id = "playButton" onclick="playToggle()"><img id = "playImg" alt = "Play Button" src = "img/play1.svg"></button>
@@ -157,7 +157,7 @@
           playToggle();
         }
         document.getElementById('loopImg').setAttribute('src', 'img/noloop1.svg')
-        vid.setAttribute('loop', 'loop')
+        vid.setAttribute('loop', 'true')
       }
     }
 
@@ -165,7 +165,7 @@
       //FrameNum in Time div, and then time in Canvas div;
       //Can put total frames next to video length; 
       if(media==='webcam'){
-        return
+        return;
       }
       let vidTime = document.getElementById('vidTime');
       function getTimeCode(microseconds) {
