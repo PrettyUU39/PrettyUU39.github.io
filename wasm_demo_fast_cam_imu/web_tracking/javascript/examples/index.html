@@ -73,7 +73,7 @@
       });
     })();
 
-    var constraints = { video: { facingMode: "environment" , width: 640, height: 480}, audio: false};
+    var constraints = { video: { facingMode: "environment" , width: 640, height: 480, frameRate: {ideal: 20}}, audio: false};
     // frameRate: {ideal: 30}
     function webcamToggle() {
       media = media === 'video' ? 'webcam' : 'video';
@@ -143,7 +143,9 @@
       context.putImageData(pixels, 0, 0);
       perf = t1 - t0;
       sum += perf;
-      if (image_cnt > 0 && myimgcnt > 1) {
+      if (image_cnt == 0 || myimgcnt == 1) {
+        image_timestamp_start = performance.now();
+      } else {
         fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
         myfps = 1000 * myimgcnt / (performance.now() - image_timestamp_start);
         if(media === 'webcam'){
@@ -156,8 +158,6 @@
         perfStr = perf.toString().slice(0, 4);
         wasmStats = `WASM computation time: ${perfStr} ms`;
         document.getElementById("stats").innerText = wasmStats;
-      } else {
-        image_timestamp_start = performance.now();
       }
       if (image_cnt % 10 === 0) {
         avg = sum / image_cnt;
