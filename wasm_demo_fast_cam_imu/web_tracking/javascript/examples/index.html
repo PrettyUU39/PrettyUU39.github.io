@@ -55,7 +55,8 @@
         ch = canvas.clientHeight;
         img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
         imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
-        draw();console.log(vid.videoWidth+"_"+vid.videoHeight);
+        draw();
+        // console.log(vid.videoWidth+"_"+vid.videoHeight);
       });
     })();
     // var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10, max: 15 } } };
@@ -64,14 +65,6 @@
       if(media==='webcam') {
         controlContent = document.getElementById('controls').innerHTML;
         document.getElementById('webcamButton').innerHTML = 'Switch to Video';
-        // navigator.mediaDevices.enumerateDevices().then(function(devices){
-
-        //   var userMediaConstraints = {
-        //       audio: false,
-        //       video: {
-        //           facingMode: 'environment',
-        //       }
-        //   }
         navigator.mediaDevices.getUserMedia({video:{facingMode: 'environment'}, audio: false})
             .then((stream) => {
                 vid.srcObject = stream;
@@ -81,10 +74,6 @@
                 media = 'video';
                 alert(err.name);
             });
-      // }).catch(function(err) {
-      //           media = 'video';
-      //           alert(err.name);
-      // });
     }
       else {
         document.getElementById('controls').innerHTML = controlContent;
@@ -101,7 +90,7 @@
         vid.play();
       }
       context.drawImage(vid, 0, 0);
-      console.log(vid.videoWidth+"_"+vid.videoHeight);
+      // console.log(vid.videoWidth+"_"+vid.videoHeight);
       // console.log('check', vid, context);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
@@ -176,7 +165,7 @@
       }
       //add thing for frameNum;  
       vidTime.innerHTML = `${getTimeCode(vid.currentTime)}`;
-      console.log(getTimeCode(vid.currentTime));
+      console.log('yes');
       setTimeout(timeData,15);
     }
 
