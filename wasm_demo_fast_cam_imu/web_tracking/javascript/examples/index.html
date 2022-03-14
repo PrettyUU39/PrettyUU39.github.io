@@ -40,6 +40,7 @@
     let web_tracking_module;
     let img_processor;
     let imgproc_HEAPU8;
+    let psum;
 
     //wasm video
     var vid = document.getElementById('v');
@@ -101,12 +102,17 @@
       if(oldpixels === undefined){
         oldpixels = pixels;
       }
-      if (oldpixels.data !== pixels.data){
-        console.log(oldpixels.data, pixels.data);
-        oldpixels.data.set(pixels.data);
+      psum = 0
+      for (let i = 0; i < pixels.data.length; i++) {
+        let temp = oldpixels.data[i]-pixels.data[i]
+        psum = temp + psum;
+      }
+      if (psum === 0){
+        console.log('same');
       }
       else{
-        console.log('same');
+        console.log(oldpixels.data, pixels.data);
+        oldpixels.data.set(pixels.data);
       }
       // console.log('check', pixels);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
