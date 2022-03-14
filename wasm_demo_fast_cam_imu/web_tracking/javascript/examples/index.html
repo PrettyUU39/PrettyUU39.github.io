@@ -96,7 +96,7 @@
     }
 
     function draw() {
-      if (vid.paused) return false;
+      if (vid.paused&&media==='video') return false;
       context.drawImage(vid, 0, 0);
       console.log(vid.videoWidth+"_"+vid.videoHeight);
       // console.log('check', vid, context);
