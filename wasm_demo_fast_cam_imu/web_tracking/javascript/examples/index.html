@@ -64,13 +64,13 @@
         // console.log(vid.videoWidth+"_"+vid.videoHeight);
       });
     })();
-    // var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10, max: 15 } } };
+    var constraints = { video: { facingMode: "environment" , audio: false, width: 1280, height: 720, frameRate: { ideal: 10, max: 15 } } };
     function webcamToggle() {
       media = media === 'video' ? 'webcam' : 'video';
       if(media==='webcam') {
         controlContent = document.getElementById('controls').innerHTML;
         document.getElementById('webcamButton').innerHTML = 'Switch to Video';
-        navigator.mediaDevices.getUserMedia({video:{facingMode: 'environment'}, audio: false})
+        navigator.mediaDevices.getUserMedia(constraints)
             .then((stream) => {
                 vid.srcObject = stream;
                 document.getElementById('controls').innerHTML = "Switch back to video for player controls";
