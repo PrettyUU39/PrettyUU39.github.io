@@ -16,7 +16,7 @@
   <div id = 'editor'>
     <div id = 'middle-col'>
       <canvas id="c" width="720" height="486"></canvas>
-      <video playsinline autoplay muted id="v" loop="false" style="display:none;" src="video/chenjing_beijing.mp4" type="video/mp4"></video>
+      <video playsinline  id="v" loop="false" autoplay style="display:none;" src="video/chenjing_beijing.mp4" type="video/mp4"></video>
       <div id = "controls">
         <div>
           <button id = "playButton" onclick="playToggle()"><img id = "playImg" alt = "Play Button" src = "img/play1.svg"></button>
@@ -69,6 +69,14 @@
       if(media==='webcam') {
         controlContent = document.getElementById('controls').innerHTML;
         document.getElementById('webcamButton').innerHTML = 'Switch to Video';
+        // navigator.mediaDevices.enumerateDevices().then(function(devices){
+
+        //   var userMediaConstraints = {
+        //       audio: false,
+        //       video: {
+        //           facingMode: 'environment',
+        //       }
+        //   }
         navigator.mediaDevices.getUserMedia({video:{facingMode: 'environment'}, audio: false})
             .then((stream) => {
                 vid.srcObject = stream;
@@ -78,6 +86,10 @@
                 media = 'video';
                 alert(err.name);
             });
+      // }).catch(function(err) {
+      //           media = 'video';
+      //           alert(err.name);
+      // });
     }
       else {
         document.getElementById('controls').innerHTML = controlContent;
@@ -152,6 +164,9 @@
     function timeData () {
       //FrameNum in Time div, and then time in Canvas div;
       //Can put total frames next to video length; 
+      if(media==='webcam'){
+        return
+      }
       let vidTime = document.getElementById('vidTime');
       function getTimeCode(microseconds) {
         let hours = Math.floor(microseconds / 3600);
