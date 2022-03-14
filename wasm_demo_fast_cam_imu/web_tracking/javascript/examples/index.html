@@ -115,7 +115,7 @@
       if(media === 'webcam'){
         if(oldpixels === undefined){
           oldpixels = pixels;
-          myimgcnt=myimgcnt+1;
+          myimgcnt+=1;
         }
         psum = 0
         for (let i = 0; i < pixels.data.length; i++) {
@@ -123,7 +123,6 @@
           psum +=temp;
         }
         if (psum === 0){
-          console.log('same');
         }
         else{
           oldpixels.data.set(pixels.data);
@@ -138,10 +137,15 @@
       context.putImageData(pixels, 0, 0);
       perf = t1 - t0;
       sum += perf;
-      if (image_cnt > 0) {
+      if (image_cnt > 0 || myimgcnt > 1) {
         fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
         myfps = 1000 * myimgcnt / (performance.now() - image_timestamp_start);
-        imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${myfps.toFixed(2)}`;
+        if(media === 'webcam'){
+          imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${myfps.toFixed(2)}`;
+        }
+        else{
+          imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${fps.toFixed(2)}`;
+        }
         document.getElementById("img").innerText = imgInfo;
         perfStr = perf.toString().slice(0, 4);
         wasmStats = `WASM computation time: ${perfStr} ms`;
