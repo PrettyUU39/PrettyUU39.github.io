@@ -78,6 +78,7 @@
     function webcamToggle() {
       media = media === 'video' ? 'webcam' : 'video';
       if(media==='webcam') {
+        myimgcnt = 0;
         controlContent = document.getElementById('controls').innerHTML;
         document.getElementById('webcamButton').innerHTML = 'Switch to Video';
         navigator.mediaDevices.getUserMedia(constraints)
