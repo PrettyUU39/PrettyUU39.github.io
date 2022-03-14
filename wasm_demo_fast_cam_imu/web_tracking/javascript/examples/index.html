@@ -56,6 +56,11 @@
         img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
         imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
         draw();
+        timeData();
+        appendWasmCheck();
+        eigenTest();
+        gyroInit();
+        accelInit();
         // console.log(vid.videoWidth+"_"+vid.videoHeight);
       });
     })();
