@@ -64,7 +64,8 @@
         // console.log(vid.videoWidth+"_"+vid.videoHeight);
       });
     })();
-    var constraints = { video: { facingMode: "environment" , audio: false, width: 1280, height: 720, frameRate: { ideal: 10, max: 15 } } };
+
+    var constraints = { video: { facingMode: "environment" , width: 1280, height: 720, frameRate: { ideal: 10, max: 15 } }, audio: false};
     function webcamToggle() {
       media = media === 'video' ? 'webcam' : 'video';
       if(media==='webcam') {
