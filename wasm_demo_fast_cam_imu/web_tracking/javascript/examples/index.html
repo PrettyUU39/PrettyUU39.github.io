@@ -98,8 +98,13 @@
       context.drawImage(vid, 0, 0);
       // console.log(vid.videoWidth+"_"+vid.videoHeight);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      if(oldpixels===null || oldpixels.data !== pixels.data){
+      if(oldpixels===null){
         console.log(image_cnt);
+        oldpixels= pixels;
+      }
+      else if (oldpixels.data !== pixels.data){
+        console.log(image_cnt);
+        oldpixels= pixels;
       }
       else{
         console.log('same');
