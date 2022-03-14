@@ -97,6 +97,9 @@
 
     function draw() {
       if (vid.paused&&media==='video') return false;
+      else if(media === 'webcam'){
+        vid.play();
+      }
       context.drawImage(vid, 0, 0);
       console.log(vid.videoWidth+"_"+vid.videoHeight);
       // console.log('check', vid, context);
