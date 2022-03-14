@@ -103,11 +103,11 @@
       }
       if (oldpixels.data !== pixels.data){
         console.log(oldpixels.data, pixels.data);
-        oldpixels= pixels;
+        oldpixels.data= pixels.data;
       }
       else{
         console.log('same');
-        oldpixels= pixels;
+        oldpixels.data= pixels.data;
       }
       // console.log('check', pixels);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
