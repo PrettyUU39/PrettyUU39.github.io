@@ -109,9 +109,7 @@
 
     function draw() {
       if (vid.paused&&media==='video') return false;
-      else if(media === 'webcam'){
-        vid.play();
-      }
+      vid.play();
       context.drawImage(vid, 0, 0);
       // console.log(vid.videoWidth+"_"+vid.videoHeight);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
