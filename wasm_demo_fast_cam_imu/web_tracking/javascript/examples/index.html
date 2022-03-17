@@ -31,6 +31,7 @@
   </br>
   <script type="module">
     import { Debugout } from 'debugout.js';
+    const bugout = new Debugout();
   </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
@@ -40,7 +41,6 @@
     // document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
     // document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
     // })();
-    const bugout = new Debugout();
     let media = 'video';
     let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt=0;
