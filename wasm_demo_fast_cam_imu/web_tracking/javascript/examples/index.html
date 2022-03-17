@@ -31,12 +31,12 @@
   </br>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
-    // ;(function () {
-    // var src = '//cdn.jsdelivr.net/npm/eruda';
-    // if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
-    // document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
-    // document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
-    // })();
+    ;(function () {
+    var src = '//cdn.jsdelivr.net/npm/eruda';
+    if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
+    document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
+    })();
     let media = 'video';
     let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt=0;
@@ -109,7 +109,9 @@
 
     function draw() {
       if (vid.paused&&media==='video') return false;
-      vid.play();
+      else if(media === 'webcam'){
+        vid.play();
+      }
       context.drawImage(vid, 0, 0);
       // console.log(vid.videoWidth+"_"+vid.videoHeight);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
@@ -133,6 +135,7 @@
       else{
         image_cnt += 1;
       }
+      // console.log('check', pixels);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       t0 = performance.now();
       pixels.data.set(detectFastCorner(pixels.data, cw, ch));
@@ -175,7 +178,7 @@
       }
       else {
         document.getElementById('playImg').setAttribute('src', 'img/play1.svg')
-        vid.pause();
+        vid.pause()
       }
     }
 
@@ -189,7 +192,7 @@
           playToggle();
         }
         document.getElementById('loopImg').setAttribute('src', 'img/noloop1.svg')
-        vid.setAttribute('loop', 'loop');
+        vid.setAttribute('loop', 'loop')
       }
     }
 
