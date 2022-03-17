@@ -3,10 +3,6 @@
   <meta charset="UTF-8">
   <link rel="Stylesheet" href="style.css" type="text/css">
   <title>Web Tracking Example</title>
-  <script type="text/javascript" src="//wap.cmread.com/rbc/t/content/repository/ues/js/s109/vconsole.js"></script>
-  <script type="text/javascript">
-  var vConsole=new VConsole();
-  </script>
 </head>
 <body>
   <header><h1>Web Tracking Example</h1></header>
@@ -35,6 +31,12 @@
   </br>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
+    ;(function () {
+    var src = '//cdn.jsdelivr.net/npm/eruda';
+    if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
+    document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
+    })();
     let media = 'video';
     let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt=0;
