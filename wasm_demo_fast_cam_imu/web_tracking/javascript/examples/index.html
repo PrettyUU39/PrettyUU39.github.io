@@ -29,6 +29,9 @@
     </div>
   </div>
   </br>
+  <script type="module">
+    import { Debugout } from 'debugout.js';
+  </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
     // ;(function () {
@@ -37,7 +40,6 @@
     // document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
     // document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
     // })();
-    import { Debugout } from 'debugout.js'
     const bugout = new Debugout();
     let media = 'video';
     let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
@@ -171,11 +173,10 @@
       if (vid.paused) {
         document.getElementById('playImg').setAttribute('src', 'img/pause1.svg')
         vid.play();
-        draw();
       }
       else {
         document.getElementById('playImg').setAttribute('src', 'img/play1.svg')
-        vid.pause()
+        vid.pause();
       }
     }
 
@@ -189,7 +190,7 @@
           playToggle();
         }
         document.getElementById('loopImg').setAttribute('src', 'img/noloop1.svg')
-        vid.setAttribute('loop', 'loop')
+        vid.setAttribute('loop', 'loop');
       }
     }
 
