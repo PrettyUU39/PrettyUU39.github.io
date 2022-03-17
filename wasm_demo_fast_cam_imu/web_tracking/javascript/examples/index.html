@@ -139,6 +139,10 @@
       else{
         image_cnt += 1;
       }
+      image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      t0 = performance.now();
+      pixels.data.set(detectFastCorner(pixels.data, cw, ch));
+      t1 = performance.now();
       context.putImageData(pixels, 0, 0);
       perf = t1 - t0;
       sum += perf;
@@ -301,7 +305,7 @@
       });
       accelscope.start();
     }
-    bugout.downloadLog();
+    // bugout.downloadLog();
   </script>
 </body>
 </html>
