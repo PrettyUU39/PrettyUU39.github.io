@@ -29,10 +29,6 @@
     </div>
   </div>
   </br>
-  <script type="module">
-    import { Debugout } from 'debugout.js';
-    const bugout = new Debugout();
-  </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
     // ;(function () {
@@ -92,10 +88,8 @@
                 if (videoTracks.length) {
                     videoTrack = videoTracks[0];
                 }
-                // console.log(videoTrack.getCapabilities());
-                // console.log(videoTrack.getSettings());
-                bugout.log(videoTrack.getCapabilities());
-                bugout.log(videoTrack.getSettings());
+                console.log(videoTrack.getCapabilities());
+                console.log(videoTrack.getSettings());
                 document.getElementById('controls').innerHTML = "Switch back to video for player controls";
             })
             .catch(function(err) {
@@ -238,8 +232,7 @@
       let angle_vector = web_tracking_module.MatrixProc.AngleVectorFromRotation(q_array);
       for (var i = 0; i < angle_vector.size(); i++) 
       { 
-        // console.log(angle_vector.get(i));
-        bugout.log(angle_vector.get(i));
+        console.log(angle_vector.get(i));
       }
 
       let size = 9;
@@ -254,8 +247,7 @@
                    -18.995493,  83.965011,  -21.77703,  74.671888, -21.200425,  62.159677, -21.057158,  45.925328,  31.154471,
                    -15.804585,  53.268423, -17.438169,  49.191292, -15.727509,  42.260373, -14.836223,  31.154471,  23.305918];
       let chi2 = web_tracking_module.MatrixProc.Chi2(size, res_array, S_array);
-      // console.log(chi2);
-      bugout.log(chi2);
+      console.log(chi2);
     }
 
     function detectFastCorner(data, cw, ch) {
@@ -305,7 +297,6 @@
       });
       accelscope.start();
     }
-    // bugout.downloadLog();
   </script>
 </body>
 </html>
