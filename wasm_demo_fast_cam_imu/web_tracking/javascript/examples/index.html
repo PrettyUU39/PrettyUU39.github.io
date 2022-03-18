@@ -29,14 +29,20 @@
     </div>
   </div>
   </br>
+  <script src="https://cdn.bootcss.com/vConsole/3.2.0/vconsole.min.js">
+  </script>
+  <script>
+  let vConsole = new VConsole();
+  console.log('test');
+  </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
-    ;(function () {
-    var src = '//cdn.jsdelivr.net/npm/eruda';
-    if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
-    document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
-    document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
-    })();
+    // ;(function () {
+    // var src = '//cdn.jsdelivr.net/npm/eruda';
+    // if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
+    // document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    // document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
+    // })();
     let media = 'video';
     let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt=0;
@@ -108,9 +114,7 @@
 
     function draw() {
       if (vid.paused&&media==='video') return false;
-      else if(media === 'webcam'){
-        vid.play();
-      }
+      vid.play();
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
       // if(media === 'webcam'){
@@ -263,7 +267,6 @@
 
     function gyroInit() {
       let gyroscope = new Gyroscope({frequency: 60});
-      console.log(gyroscope.frequency);
       let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
       gyroscope.addEventListener('reading', e => {
         gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
