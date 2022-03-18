@@ -88,8 +88,7 @@
                 if (videoTracks.length) {
                     videoTrack = videoTracks[0];
                 }
-                console.log(videoTrack.getCapabilities());
-                console.log(videoTrack.getSettings());
+                console.log(stream);
                 document.getElementById('controls').innerHTML = "Switch back to video for player controls";
             })
             .catch(function(err) {

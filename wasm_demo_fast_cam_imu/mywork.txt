@@ -7,4 +7,10 @@ when switch back to video can't autoplay so change toggle function
 img wrong when switch back to video
 
 framerate related:
+sucessfully make the framerate work
+find ways to get the restriction for each device
+todo: find ways to get effective frame
+
+log related:
+find different ways to see log in phone
 
