@@ -69,13 +69,13 @@
         ch = canvas.clientHeight;
         img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
         imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
-        draw();
         timeData();
         appendWasmCheck();
         eigenTest();
         gyroInit();
         accelInit();
-        // console.log(vid.videoWidth+"_"+vid.videoHeight);
+        draw();
+        console.log(vid.videoWidth+"_"+vid.videoHeight);
       });
     })();
 
@@ -114,6 +114,7 @@
 
     function draw() {
       if (vid.paused&&media==='video') return false;
+      console.log('hello');
       vid.play();
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
