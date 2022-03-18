@@ -31,12 +31,12 @@
   </br>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
-    // ;(function () {
-    // var src = '//cdn.jsdelivr.net/npm/eruda';
-    // if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
-    // document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
-    // document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
-    // })();
+    ;(function () {
+    var src = '//cdn.jsdelivr.net/npm/eruda';
+    if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
+    document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
+    })();
     let media = 'video';
     let t0, t1 = Infinity, sum=0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt=0;
