@@ -133,7 +133,7 @@
       else{
         image_cnt += 1;
       }
-      // console.log('check', pixels);
+      console.log('check', pixels.data);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       t0 = performance.now();
       pixels.data.set(detectFastCorner(pixels.data, cw, ch));
@@ -161,8 +161,11 @@
         avg = sum / image_cnt;
         avgDisplay.innerText = `Average computation time WASM: ${avg.toString().slice(0, 4)} ms`;
       }
+      setTimeout(() => {
+        draw();
+      }, 50);
+      // requestAnimationFrame(draw); 
 
-      requestAnimationFrame(draw); 
     }
 
     //case for when loop is off and video pauses at end without someone clicking play button
