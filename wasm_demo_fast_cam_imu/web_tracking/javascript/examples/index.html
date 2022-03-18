@@ -263,7 +263,7 @@
 
     function gyroInit() {
       let gyroscope = new Gyroscope({frequency: 60});
-      console.log(gyroscope.frequency());
+      console.log(gyroscope.frequency);
       let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
       gyroscope.addEventListener('reading', e => {
         gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
