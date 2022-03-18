@@ -124,6 +124,7 @@
           psum +=temp;
         }
         if (psum === 0){
+          console.log('same');
         }
         else{
           oldpixels.data.set(pixels.data);
@@ -133,7 +134,6 @@
       else{
         image_cnt += 1;
       }
-      console.log('check', pixels.data);
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       t0 = performance.now();
       pixels.data.set(detectFastCorner(pixels.data, cw, ch));
