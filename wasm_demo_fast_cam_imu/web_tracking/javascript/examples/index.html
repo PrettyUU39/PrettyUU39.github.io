@@ -157,10 +157,10 @@
         avgDisplay.innerText = `Average computation time WASM: ${avg.toString().slice(0, 4)} ms`;
       }
       image_cnt+=1;
-      setTimeout(() => {
-        draw();
-      }, 50);
-      // requestAnimationFrame(draw); 
+      // setTimeout(() => {
+      //   draw();
+      // }, 50);
+      requestAnimationFrame(draw); 
 
     }
 
