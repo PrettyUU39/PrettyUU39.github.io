@@ -33,7 +33,7 @@
   </script>
   <script>
   let vConsole = new VConsole();
-  console.log('test');
+  console.log('haha');
   </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
@@ -59,8 +59,8 @@
     var vid = document.getElementById('v');
     var canvas = document.getElementById('c');
     var context = canvas.getContext('2d');
-    let load = async () => { web_tracking_module = await WebTracking(); };
-    load().then(() => {
+    WebTracking().then(libary => {
+      web_tracking_module = libary;
       vid.addEventListener("loadeddata", function() {
         canvas.setAttribute('height', vid.videoHeight);
         canvas.setAttribute('width', vid.videoWidth);
