@@ -113,28 +113,28 @@
       }
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      if(media === 'webcam'){
-        if(oldpixels === undefined){
-          oldpixels = pixels;
-          myimgcnt+=1;
-        }
-        psum = 0
-        for (let i = 0; i < pixels.data.length; i++) {
-          let temp = oldpixels.data[i]-pixels.data[i]
-          psum +=temp;
-        }
-        if (psum === 0){
-          console.log('same');
-        }
-        else{
-          oldpixels.data.set(pixels.data);
-          myimgcnt+=1;
-          console.log(pixels.data);
-        }
-      }
-      else{
-        image_cnt += 1;
-      }
+      // if(media === 'webcam'){
+      //   if(oldpixels === undefined){
+      //     oldpixels = pixels;
+      //     myimgcnt+=1;
+      //   }
+      //   psum = 0
+      //   for (let i = 0; i < pixels.data.length; i++) {
+      //     let temp = oldpixels.data[i]-pixels.data[i]
+      //     psum +=temp;
+      //   }
+      //   if (psum === 0){
+      //     console.log('same');
+      //   }
+      //   else{
+      //     oldpixels.data.set(pixels.data);
+      //     myimgcnt+=1;
+      //     console.log(pixels.data);
+      //   }
+      // }
+      // else{
+      //   image_cnt += 1;
+      // }
       image_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       t0 = performance.now();
       pixels.data.set(detectFastCorner(pixels.data, cw, ch));
@@ -142,17 +142,11 @@
       context.putImageData(pixels, 0, 0);
       perf = t1 - t0;
       sum += perf;
-      if (image_cnt == 0 || myimgcnt == 1) {
+      if (image_cnt == 0) {
         image_timestamp_start = performance.now();
       } else {
         fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
-        myfps = 1000 * myimgcnt / (performance.now() - image_timestamp_start);
-        if(media === 'webcam'){
-          imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${myfps.toFixed(2)}`;
-        }
-        else{
-          imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${fps.toFixed(2)}`;
-        }
+        imgInfo = `Image Timestamp: ${image_timestamp.toFixed(6)} ms, FPS: ${fps.toFixed(2)}`;
         document.getElementById("img").innerText = imgInfo;
         perfStr = perf.toString().slice(0, 4);
         wasmStats = `WASM computation time: ${perfStr} ms`;
@@ -162,6 +156,7 @@
         avg = sum / image_cnt;
         avgDisplay.innerText = `Average computation time WASM: ${avg.toString().slice(0, 4)} ms`;
       }
+      image_cnt+=1;
       setTimeout(() => {
         draw();
       }, 50);
