@@ -182,6 +182,7 @@
     }
 
     function draw() {
+      console.time('draw');
       if (vid.paused && media === 'video') return false;
       else if (media === 'webcam') {
         vid.play();
@@ -222,6 +223,7 @@
       }
       image_cnt += 1;
       requestAnimationFrame(draw);
+      console.timeEnd('draw');
     }
 
     //case for when loop is off and video pauses at end without someone clicking play button
