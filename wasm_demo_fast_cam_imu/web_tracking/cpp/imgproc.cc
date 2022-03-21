@@ -7,6 +7,17 @@ ImgProc::ImgProc(int img_cols, int img_rows, int img_step) {
   gray = cv_mini::Mat(img_cols, img_rows, img_step);
 }
 
+bool ImgProc::detectRepeated(uintptr_t ptrold,uintptr_t ptrnew,int size) {
+  unsigned char* olddata = reinterpret_cast<unsigned char*>(ptrold);
+  unsigned char* newdata = reinterpret_cast<unsigned char*>(ptrnew);
+  if(memcmp(olddata, newdata, size)==0){
+    return true;
+  }
+  else{
+    return false;
+  };
+}
+
 void ImgProc::detectFastCorner(uintptr_t ptr, int img_cols, int img_rows) {
   unsigned char* data = reinterpret_cast<unsigned char*>(ptr);
 
