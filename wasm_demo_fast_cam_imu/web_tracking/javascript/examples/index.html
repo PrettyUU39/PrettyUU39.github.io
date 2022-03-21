@@ -130,7 +130,6 @@
           });
       }
       else {
-        image_cnt = 0;
         document.getElementById('controls').innerHTML = controlContent;
         document.getElementById('webcamButton').innerHTML = 'Switch to Webcam';
         vid.srcObject = null;
@@ -325,7 +324,7 @@
       let gyroscope = new Gyroscope({ frequency: 60 });
       let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt = 0;
       gyroscope.addEventListener('reading', e => {
-        console.time('gyro');
+        // console.time('gyro');
         gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         if (gyro_cnt > 0) {
           gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
@@ -337,7 +336,7 @@
           gyro_timestamp_start = performance.now();
         }
         gyro_cnt += 1;
-        console.timeEnd('gyro');
+        // console.timeEnd('gyro');
       });
       gyroscope.start();
     }
