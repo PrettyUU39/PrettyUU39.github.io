@@ -44,12 +44,6 @@
   </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
-    // ;(function () {
-    // var src = '//cdn.jsdelivr.net/npm/eruda';
-    // if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
-    // document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
-    // document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
-    // })();
     let media = 'video';
     let t0, t1 = Infinity, sum = 0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
@@ -115,7 +109,6 @@
     })();
 
     var constraints = { video: { facingMode: "environment", width: 640, height: 480, frameRate: { ideal: 20 } }, audio: false };
-    // frameRate: {ideal: 30}
     function webcamToggle() {
       media = media === 'video' ? 'webcam' : 'video';
       if (media === 'webcam') {
@@ -159,6 +152,7 @@
             if (temp !== 0) {
               oldpixels.data.set(pixels.data);
               flag = false;
+              break;
             }
           }
           flag = true
