@@ -93,6 +93,7 @@
           cw = canvas.clientWidth; //usually same as canvas.height
           ch = canvas.clientHeight;
           sleep(500).then(() => {
+          document.getElementById("stats").innerText = `ready to play`;
           img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
           imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
           draw();
@@ -101,8 +102,6 @@
           eigenTest();
           gyroInit();
           accelInit();
-          console.log('no')
-          console.log(vid.videoWidth+"_"+vid.videoHeight);
         })
       });
   })();
