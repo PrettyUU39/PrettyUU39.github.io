@@ -203,6 +203,7 @@
     function playToggle () { //does both vids together
       if (vid.paused) {
         document.getElementById('playImg').setAttribute('src', 'img/pause1.svg')
+        vid.srcObject = null;
         vid.play();
         draw();
       }

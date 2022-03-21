@@ -14,3 +14,8 @@ todo: find ways to get effective frame
 log related:
 find different ways to see log in phone
 
+imu related:
+confirm that can't higher than 60
+
+
+
