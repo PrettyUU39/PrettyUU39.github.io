@@ -156,8 +156,8 @@
           for (let i = 0; i < pixels.data.length; i++) {
             let temp = oldpixels.data[i] - pixels.data[i]
             if (temp !== 0) {
-              console.log(pixels.data);
               oldpixels.data.set(pixels.data);
+              console.log('different');
               return false;// different frame
             }
           }
