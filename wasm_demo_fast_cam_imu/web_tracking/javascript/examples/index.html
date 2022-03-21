@@ -148,27 +148,17 @@
           return false;
         }// first frame
         else {
-          // let flag = true;
-          // for (let i = 0; i < pixels.data.length; i++) {
-          //   let temp = oldpixels.data[i] - pixels.data[i]
-          //   if (temp !== 0) {
-          //     oldpixels.data.set(pixels.data);
-          //     flag = false;
-          //     break;
-          //   }
-          // }
-          console.log(oldpixels.data.toString())
-          console.log(pixels.data.toString())
-          if(oldpixels.data.toString()!==pixels.data.toString()){
-            oldpixels.data.set(pixels.data);
-            return false;
-          }
-          else{
-            return true;
+          let flag = true;
+          for (let i = 0; i < pixels.data.length/1000; i++) {
+            let temp = oldpixels.data[i] - pixels.data[i]
+            if (temp !== 0) {
+              oldpixels.data.set(pixels.data);
+              flag = false;
+              break;
+            }
           }
           //same frame
-          // console.log(flag)
-          // return flag;
+          return flag;
         }
       }
       else {
