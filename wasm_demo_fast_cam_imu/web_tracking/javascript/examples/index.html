@@ -157,6 +157,8 @@
           //     break;
           //   }
           // }
+          console.log(oldpixels.data.toString())
+          console.log(pixels.data.toString())
           if(oldpixels.data.toString()!==pixels.data.toString()){
             oldpixels.data.set(pixels.data);
             return false;
