@@ -196,11 +196,11 @@
       //   context.putImageData(pixels, 0, 0);
       // }
       // else {
-      //   image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
-      //   t0 = performance.now();
+      image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
+      t0 = performance.now();
       //   dpixels = detectFastCorner(pixels.data, cw, ch);
       //   pixels.data.set(dpixels);
-      //   t1 = performance.now();
+      t1 = performance.now();
       //   context.putImageData(pixels, 0, 0);
       // }
       perf = t1 - t0;
