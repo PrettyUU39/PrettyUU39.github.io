@@ -157,12 +157,10 @@
             let temp = oldpixels.data[i] - pixels.data[i]
             if (temp !== 0) {
               oldpixels.data.set(pixels.data);
-              console.log('different');
               return false;// different frame
             }
           }
           //same frame
-          console.log('same');
           return true;
         }
       }
@@ -179,6 +177,7 @@
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
       if (detectrepeat()) {
+        console.log('same');
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         pixels.data.set(dpixels);
@@ -186,6 +185,7 @@
         context.putImageData(pixels, 0, 0);
       }
       else {
+        console.log('different');
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         dpixels = detectFastCorner(pixels.data, cw, ch);
