@@ -173,7 +173,31 @@
       }
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      if (detectrepeat()) {
+
+      let flag = true;
+      if (media === 'webcam') {
+        if (oldpixels === undefined) {
+          oldpixels = pixels;
+          console.log(pixels.data.length)
+          flag = false;
+        }// first frame
+        else {
+          for (let i = 0; i < pixels.data.length; i++) {
+            let temp = oldpixels.data[i] - pixels.data[i]
+            if (temp !== 0) {
+              oldpixels.data.set(pixels.data);
+              flag = false;
+              break;
+            }
+          }
+          //same frame
+        }
+      }
+      else {
+        flag = false;
+      }
+
+      if (flag) {
         console.log('same')
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
