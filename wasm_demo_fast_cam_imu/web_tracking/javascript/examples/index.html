@@ -153,15 +153,18 @@
           oldpixels = pixels;
         }// first frame
         else {
+          let flag = true;
           for (let i = 0; i < pixels.data.length; i++) {
             let temp = oldpixels.data[i] - pixels.data[i]
             if (temp !== 0) {
               oldpixels.data.set(pixels.data);
-              return false;// different frame
+              flag = false;
             }
           }
+          flag = true
           //same frame
-          return true;
+          console.log(flag)
+          return flag;
         }
       }
       else {
