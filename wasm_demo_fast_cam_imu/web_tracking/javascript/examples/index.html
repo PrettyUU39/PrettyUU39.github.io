@@ -122,7 +122,6 @@
             if (videoTracks.length) {
               videoTrack = videoTracks[0];
             }
-            console.log(stream);
             document.getElementById('controls').innerHTML = "Switch back to video for player controls";
           })
           .catch(function (err) {
@@ -167,7 +166,6 @@
       if (media === 'webcam') {
         if (oldpixels === undefined) {
           oldpixels = pixels;
-          console.log(pixels.data.length)
           return false;
         }// first frame
         else {
@@ -190,10 +188,8 @@
       }
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      console.time("calculate flag")
       if (detectrepeat()) {//or flag
         // console.log('same')
-        console.timeEnd("calculate flag")
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         pixels.data.set(dpixels);
@@ -201,8 +197,6 @@
         context.putImageData(pixels, 0, 0);
       }
       else {
-        console.timeEnd("calculate flag")
-        console.log('diff')
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         dpixels = detectFastCorner(pixels.data, cw, ch);
