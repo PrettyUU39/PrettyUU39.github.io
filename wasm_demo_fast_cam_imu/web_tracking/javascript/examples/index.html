@@ -153,17 +153,6 @@
             oldpixels.data.set(pixels.data);
           }
           return (!flag);
-          
-          // for (let i = 0; i < pixels.data.length; i++) {
-          //   let temp = oldpixels.data[i] - pixels.data[i]
-          //   if (temp !== 0) {
-          //     oldpixels.data.set(pixels.data);
-          //     flag = false;
-          //     break;
-          //   }
-          // }
-          //same frame
-          // return flag;
         }
       }
       else {
@@ -201,9 +190,10 @@
       // else {
       //   flag = false;
       // }
-
-      if (detectrepeat()) {
-        console.log('same')
+      console.time("calculate flag")
+      if (detectrepeat()) {//or flag
+        // console.log('same')
+        console.timeEnd("calculate flag")
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         pixels.data.set(dpixels);
@@ -211,7 +201,8 @@
         context.putImageData(pixels, 0, 0);
       }
       else {
-        console.log('diff')
+        console.timeEnd("calculate flag")
+        // console.log('diff')
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         dpixels = detectFastCorner(pixels.data, cw, ch);
