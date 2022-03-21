@@ -144,20 +144,29 @@
       if (media === 'webcam') {
         if (oldpixels === undefined) {
           oldpixels = pixels;
+          console.log(pixels.data.length)
+          return false;
         }// first frame
         else {
-          let flag = true;
-          for (let i = 0; i < pixels.data.length; i++) {
-            let temp = oldpixels.data[i] - pixels.data[i]
-            if (temp !== 0) {
-              oldpixels.data.set(pixels.data);
-              flag = false;
-              break;
-            }
+          // let flag = true;
+          // for (let i = 0; i < pixels.data.length; i++) {
+          //   let temp = oldpixels.data[i] - pixels.data[i]
+          //   if (temp !== 0) {
+          //     oldpixels.data.set(pixels.data);
+          //     flag = false;
+          //     break;
+          //   }
+          // }
+          if(oldpixels.data.toString()!==pixels.data.toString()){
+            oldpixels.data.set(pixels.data);
+            return false;
+          }
+          else{
+            return true;
           }
           //same frame
-          console.log(flag)
-          return flag;
+          // console.log(flag)
+          // return flag;
         }
       }
       else {
@@ -173,7 +182,7 @@
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
       if (detectrepeat()) {
-        console.log('same');
+        console.log('same')
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         pixels.data.set(dpixels);
@@ -181,7 +190,7 @@
         context.putImageData(pixels, 0, 0);
       }
       else {
-        console.log('different');
+        console.log('diff')
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         dpixels = detectFastCorner(pixels.data, cw, ch);
