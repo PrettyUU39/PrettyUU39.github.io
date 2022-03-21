@@ -148,17 +148,22 @@
           return false;
         }// first frame
         else {
-          let flag = true;
-          for (let i = 0; i < pixels.data.length/1000; i++) {
-            let temp = oldpixels.data[i] - pixels.data[i]
-            if (temp !== 0) {
-              oldpixels.data.set(pixels.data);
-              flag = false;
-              break;
-            }
+          let flag = (oldpixels.data[0]-pixels.data[0])&&(oldpixels.data[100]-pixels.data[100])&&(oldpixels.data[200]-pixels.data[200])&&(oldpixels.data[300]-pixels.data[300])&&(oldpixels.data[1000000]-pixels.data[1000000]);
+          if(flag!=false){
+            oldpixels.data.set(pixels.data);
           }
+          return (!flag);
+          
+          // for (let i = 0; i < pixels.data.length; i++) {
+          //   let temp = oldpixels.data[i] - pixels.data[i]
+          //   if (temp !== 0) {
+          //     oldpixels.data.set(pixels.data);
+          //     flag = false;
+          //     break;
+          //   }
+          // }
           //same frame
-          return flag;
+          // return flag;
         }
       }
       else {
@@ -174,30 +179,30 @@
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
 
-      let flag = true;
-      if (media === 'webcam') {
-        if (oldpixels === undefined) {
-          oldpixels = pixels;
-          console.log(pixels.data.length)
-          flag = false;
-        }// first frame
-        else {
-          for (let i = 0; i < pixels.data.length; i++) {
-            let temp = oldpixels.data[i] - pixels.data[i]
-            if (temp !== 0) {
-              oldpixels.data.set(pixels.data);
-              flag = false;
-              break;
-            }
-          }
-          //same frame
-        }
-      }
-      else {
-        flag = false;
-      }
+      // let flag = true;
+      // if (media === 'webcam') {
+      //   if (oldpixels === undefined) {
+      //     oldpixels = pixels;
+      //     console.log(pixels.data.length)
+      //     flag = false;
+      //   }// first frame
+      //   else {
+      //     for (let i = 0; i < pixels.data.length; i++) {
+      //       let temp = oldpixels.data[i] - pixels.data[i]
+      //       if (temp !== 0) {
+      //         oldpixels.data.set(pixels.data);
+      //         flag = false;
+      //         break;
+      //       }
+      //     }
+      //     //same frame
+      //   }
+      // }
+      // else {
+      //   flag = false;
+      // }
 
-      if (flag) {
+      if (detectrepeat()) {
         console.log('same')
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
