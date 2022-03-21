@@ -186,23 +186,23 @@
         vid.play();
       }
       context.drawImage(vid, 0, 0);
-      pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      if (detectrepeat()) {//or flag
-        // console.log('same')
-        image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
-        t0 = performance.now();
-        pixels.data.set(dpixels);
-        t1 = performance.now();
-        context.putImageData(pixels, 0, 0);
-      }
-      else {
-        image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
-        t0 = performance.now();
-        dpixels = detectFastCorner(pixels.data, cw, ch);
-        pixels.data.set(dpixels);
-        t1 = performance.now();
-        context.putImageData(pixels, 0, 0);
-      }
+      // pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+      // if (detectrepeat()) {//or flag
+      //   // console.log('same')
+      //   image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
+      //   t0 = performance.now();
+      //   pixels.data.set(dpixels);
+      //   t1 = performance.now();
+      //   context.putImageData(pixels, 0, 0);
+      // }
+      // else {
+      //   image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
+      //   t0 = performance.now();
+      //   dpixels = detectFastCorner(pixels.data, cw, ch);
+      //   pixels.data.set(dpixels);
+      //   t1 = performance.now();
+      //   context.putImageData(pixels, 0, 0);
+      // }
       perf = t1 - t0;
       sum += perf;
       if (image_cnt == 0) {
