@@ -86,24 +86,26 @@
     (async () => {
       // Wait for the library to initialize
       web_tracking_module = await WebTracking();
-      sleep(200).then(() => {
+      console.log('yes')
       vid.addEventListener("loadeddata", function() {
-        canvas.setAttribute('height', vid.videoHeight);
-        canvas.setAttribute('width', vid.videoWidth);
-        cw = canvas.clientWidth; //usually same as canvas.height
-        ch = canvas.clientHeight;
-        img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
-        imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
-        timeData();
-        appendWasmCheck();
-        eigenTest();
-        gyroInit();
-        accelInit();
-        draw();
-        console.log(vid.videoWidth+"_"+vid.videoHeight);
+          canvas.setAttribute('height', vid.videoHeight);
+          canvas.setAttribute('width', vid.videoWidth);
+          cw = canvas.clientWidth; //usually same as canvas.height
+          ch = canvas.clientHeight;
+          sleep(500).then(() => {
+          img_processor = web_tracking_module.ImgProc.getImgProcessor(cw,ch,cw);
+          imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
+          draw();
+          timeData();
+          appendWasmCheck();
+          eigenTest();
+          gyroInit();
+          accelInit();
+          console.log('no')
+          console.log(vid.videoWidth+"_"+vid.videoHeight);
+        })
       });
-    });
-    })();
+  })();
 
     var constraints = { video: { facingMode: "environment" , width: 640, height: 480, frameRate: {ideal: 20}}, audio: false};
     // frameRate: {ideal: 30}
