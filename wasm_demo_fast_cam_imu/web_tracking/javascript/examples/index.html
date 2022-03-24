@@ -47,7 +47,7 @@
     let media = 'video';
     let t0, t1 = Infinity, sum = 0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
-    let pixels, oldpixels, cw, ch;
+    let pixels, oldpixels_mem, cw, ch;
     let dpixels;//record the result of detectfastcorner of one pixels
     let imgInfo, gyroInfo, accelInfo;
     let avgDisplay = document.getElementById('avg');
@@ -140,65 +140,17 @@
 
     function detectrepeat() {
       let flag;
-      if(oldpixels === undefined || media ==='video'){
-        oldpixels = pixels;
+      const len = pixels.data.length;
+      if(oldpixels_mem === undefined){
+        oldpixels_mem = web_tracking_module.ImgProc.malloc(len);
+        newpixels_mem = web_tracking_module.ImgProc.malloc(len);
         flag = false;
       }
       else{
-        const len = pixels.data.length;
-        const newmem = web_tracking_module.ImgProc.malloc(len);
-        const oldmem = web_tracking_module.ImgProc.malloc(len);
-        imgproc_HEAPU8.set(pixels.data, newmem);
-        imgproc_HEAPU8.set(oldpixels.data, oldmem);
-        flag = img_processor.detectRepeated(oldmem, newmem, len);
-        console.log(flag)
-        if(flag==false){
-          oldpixels.data.set(pixels.data);
-        }
-        web_tracking_module.ImgProc.free(oldmem);
-        web_tracking_module.ImgProc.free(newmem);
-
+        imgproc_HEAPU8.set(pixels.data, newpixels_mem);
+        flag = img_processor.detectRepeated(oldpixels_mem, newpixels_mem, len);
       }
       return flag;
-      // let flag = true;
-      // if (media === 'webcam') {
-      //   if (oldpixels === undefined) {
-      //     oldpixels = pixels;
-      //     console.log(pixels.data.length)
-      //     flag = false;
-      //   }// first frame
-      //   else {
-      //     for (let i = 0; i < pixels.data.length; i++) {
-      //       let temp = oldpixels.data[i] - pixels.data[i]
-      //       if (temp !== 0) {
-      //         oldpixels.data.set(pixels.data);
-      //         flag = false;
-      //         break;
-      //       }
-      //     }
-      //     //same frame
-      //   }
-      // }
-      // else {
-      //   flag = false;
-      // }
-      // return flag;
-      // if (media === 'webcam') {
-      //   if (oldpixels === undefined) {
-      //     oldpixels = pixels;
-      //     return false;
-      //   }// first frame
-      //   else {
-      //     let flag = true;
-      //     if(flag!=false){
-      //       oldpixels.data.set(pixels.data);
-      //     }
-      //     return (!flag);
-      //   }
-      // }
-      // else {
-      //   return false;
-      // }
     }
 
     function draw() {
@@ -209,7 +161,6 @@
       context.drawImage(vid, 0, 0);
       pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
       if (detectrepeat()) {//or flag
-        // console.log('same')
         image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
         t0 = performance.now();
         pixels.data.set(dpixels);

@@ -14,6 +14,7 @@ bool ImgProc::detectRepeated(uintptr_t ptrold,uintptr_t ptrnew,int size) {
     return true;
   }
   else{
+    memcpy(olddata,newdata,size);
     return false;
   };
 }
