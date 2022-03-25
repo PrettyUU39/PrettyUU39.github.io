@@ -57,7 +57,7 @@
       console.log('Registration failed with ' + error);
     });
   }
-  this.addEventListener('message', (data) => {
+  navigator.serviceWorker.addEventListener('message', (data) => {
     if (data.source == 'serviceworker') {
         console.log(data.msg)
     }
