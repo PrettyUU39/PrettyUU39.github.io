@@ -3,15 +3,21 @@ self.addEventListener('install', function(event) {
         console.log('install ready')
     );
   });
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        self.clients.matchAll().then ( (client) => {
-            client.postMessage({
-                msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
-                source: 'serviceworker'
-            })
-        })
-    )
+// self.addEventListener('activate', (event) => {
+//     event.waitUntil(
+//         self.clients.matchAll().then ( (clients) => {
+//             clients[0].postMessage({
+//                 msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
+//                 source: 'serviceworker'
+//             })
+//         })
+//     )
+// })
+self.clients.matchAll().then ( (clients) => {
+    clients[0].postMessage({
+        msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
+        source: 'serviceworker'
+    })
 })
   self.addEventListener('devicemotion', function(event) {
     gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
@@ -20,8 +26,8 @@ self.addEventListener('activate', (event) => {
       gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
                   Frequency: ${gyro_hz.toFixed(3)} Hz
                   Data: ${event.acceleration.x.toFixed(3)}, ${event.acceleration.y.toFixed(3)}, ${event.acceleration.z.toFixed(3)}`;
-                  self.clients.matchAll().then ( (client) => {
-                    client.postMessage({
+                  self.clients.matchAll().then ( (clients) => {
+                    clients[0].postMessage({
                         msg: event.acceleration.x,
                         source: 'serviceworker'
                     })
@@ -31,3 +37,4 @@ self.addEventListener('activate', (event) => {
     }
     gyro_cnt += 1;
   });
+

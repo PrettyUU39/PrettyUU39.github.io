@@ -58,9 +58,9 @@
     });
   }
   navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data.source === 'serviceworker') {
+    // if (event.data.source === 'serviceworker') {
         console.log(event.data.msg)
-    }
+    // }
 })
     let start_img = false;
     let start_imu = false;
