@@ -49,7 +49,7 @@
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/ros_capture/serviceworker.js').then(function(reg) {
+    navigator.serviceWorker.register('/wasm_demo_fast_cam_imu/web_tracking/javascript/ros_capture/serviceworker.js').then(function(reg) {
       // registration worked
       console.log('Registration succeeded. Scope is ' + reg.scope);
     }).catch(function(error) {
