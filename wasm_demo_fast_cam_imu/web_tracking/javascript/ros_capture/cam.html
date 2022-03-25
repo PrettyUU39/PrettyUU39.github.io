@@ -1,0 +1,192 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="Stylesheet" href="../examples/style.css" type="text/css">
+  <title>Web Tracking Example</title>
+</head>
+
+<body>
+  <header>
+    <h1>Web Tracking Example</h1>
+  </header>
+  <div id="statsContainer"></div>
+  <button id="capture" onclick="capture()">start capturing</button>
+  <p id="img"></p>
+  <p id="stats">Loading..</p>
+  <input type="range" hidden />
+  <div id='editor'>
+    <div id='middle-col'>
+      <canvas id="c" width="480" height="640"></canvas>
+      <video playsinline id="v" style="display:none;"></video>
+    </div>
+  </div>
+  </br>
+  <script src="https://cdn.bootcss.com/vConsole/3.2.0/vconsole.min.js" crossorigin></script>
+  <script>
+    let vConsole = new VConsole();
+  </script>
+  <script src="../thirdparty/roslib.min.js"></script>
+  <script>
+    // setup connection to the ROS server and prepare the topic
+    var ros = new ROSLIB.Ros();
+    ros.on('connection', function() { console.log('Connected to websocket server.');});
+    ros.on('error', function(error) { console.log('Error connecting to websocket server: ', error); window.alert('Error connecting to websocket server'); });
+    ros.on('close', function() { console.log('Connection to websocket server closed.');});
+    var imageTopic = new ROSLIB.Topic({
+      ros : ros,
+      name : '/mobile/image/compressed',
+      messageType : 'sensor_msgs/CompressedImage'
+    });
+  </script>
+  <script src="../dist/wasm/umd/index.js"></script>
+  <script>
+    let start = false;
+    let t0, t1 = Infinity, sum = 0, line, perf = 0, perfStr, avg, wasmStats;
+    let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
+    let pixels, cw = 480, ch = 640;
+    let dpixels;//record the result of detectfastcorner of one pixels
+    let imgInfo, gyroInfo, accelInfo;
+    let web_tracking_module;
+    let img_processor;
+    let imgproc_HEAPU8;
+    let oldpixels_mem, newpixels_mem;
+
+    function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+    //wasm video
+    var vid = document.getElementById('v');
+    var canvas = document.getElementById('c');
+    var context = canvas.getContext('2d');
+    (async () => {
+      // Wait for the library to initialize
+      web_tracking_module = await WebTracking();
+      sleep(200).then(() => {
+        appendWasmCheck();
+        img_processor = web_tracking_module.ImgProc.getImgProcessor(cw, ch, cw);
+        imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
+        document.getElementById("stats").innerText = `ready`;
+      })
+    })();
+
+    var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10 } }, audio: false };
+    function capture() {
+      if (!start) {
+        start = true;
+        document.getElementById('capture').innerHTML = 'stop capturing';
+        navigator.mediaDevices.getUserMedia(constraints)
+          .then((stream) => {
+            vid.srcObject = stream;
+            const track = stream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities();
+            // Check whether focus distance is supported or not.
+            if (capabilities.focusDistance) {
+              console.log("value " + track.getSettings().focusDistance);
+              track.applyConstraints({
+                  advanced: [{
+                    focusMode: "manual",
+                    focusDistance: 1.8
+                  }]
+              });
+              sleep(200).then(() => {
+                console.log("value " + track.getSettings().focusDistance);
+                vid.play();
+              })
+              // const input = document.querySelector('input[type="range"]');
+              // input.min = capabilities.focusDistance.min;
+              // input.max = capabilities.focusDistance.max;
+              // input.step = capabilities.focusDistance.step;
+              // input.value = track.getSettings().focusDistance;
+              // console.log("min " + capabilities.focusDistance.min);
+              // console.log("max " + capabilities.focusDistance.max);
+              // console.log("step " + capabilities.focusDistance.step);
+              // console.log("value " + track.getSettings().focusDistance);
+
+              // input.oninput = function(event) {
+              //   track.applyConstraints({
+              //     advanced: [{
+              //       focusMode: "manual",
+              //       focusDistance: event.target.value
+              //     }]
+              //   });
+              //   sleep(200).then(() => {
+              //     document.getElementById("stats").innerText = event.target.value;
+              //   })
+              // };
+              // input.hidden = false;
+            } else {
+              alert("no focusDistance support!");
+            }
+            ros.connect("wss://" + window.location.hostname + ":9090");
+            sleep(500).then(() => {
+              draw();
+            })
+          })
+          .catch(function (err) {
+            media = 'video';
+            alert(err.name);
+          });
+      }
+      else {
+        start = false;
+        ros.close();
+        document.getElementById('capture').innerHTML = 'start capturing';
+        vid.srcObject = null;
+      }
+    }
+
+    function detectrepeat() {
+      let flag;
+      const len = pixels.data.length;
+      if(oldpixels_mem === undefined){
+        oldpixels_mem = web_tracking_module.ImgProc.malloc(len);
+        newpixels_mem = web_tracking_module.ImgProc.malloc(len);
+        flag = false;
+      }
+      else{
+        imgproc_HEAPU8.set(pixels.data, newpixels_mem);
+        flag = img_processor.detectRepeated(oldpixels_mem, newpixels_mem, len);
+      }
+      return flag;
+    }
+
+    function draw() {
+      context.drawImage(vid, 0, 0);
+      image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
+      let ros_secs = Math.floor(image_timestamp);
+      let ros_nsecs = Math.round(1000000000*(image_timestamp-ros_secs));
+      pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+      if (!detectrepeat()) {
+        jpeg_data = canvas.toDataURL('image/jpeg');
+        var imageMessage = new ROSLIB.Message({
+            header : {
+              stamp : {secs : ros_secs, nsecs : ros_nsecs},
+              frame_id : ''
+            },
+            format : "jpeg",
+            data : jpeg_data.replace("data:image/jpeg;base64,", "")
+        });
+        sleep(100).then(() => {
+          imageTopic.publish(imageMessage);
+        })
+      }
+      requestAnimationFrame(draw);
+    }
+
+    function appendWasmCheck() {
+      if ('WebAssembly' in window) {
+        document.getElementById('statsContainer').innerHTML = `(\u2713 WebAssembly is supported in your browser)`
+      }
+      else if (/Mobi/.test(navigator.userAgent)) {
+        document.getElementById('statsContainer').innerHTML = `<h3 style="color:#a37c6e;">\u2639 WebAssembly is not yet supported on mobile devices. Please view on desktop browser.</h3>`
+      }
+      else {
+        document.getElementById('statsContainer').innerHTML = `<h3 style="color:#a37c6e;">\u2639 WebAssembly is not supported in your browser. Please update to the latest version of Chrome or Firefox to enable WebAssembly</h3>`
+      }
+    }
+  </script>
+</body>
+
+</html>
