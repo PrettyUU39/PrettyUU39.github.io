@@ -57,11 +57,11 @@
       console.log('Registration failed with ' + error);
     });
   }
-  navigator.serviceWorker.addEventListener('message', (event) => {
+  navigator.serviceWorker.onmessage = (event) => {
     // if (event.data.source === 'serviceworker') {
         console.log(event.data.msg)
     // }
-})
+}
     let start_img = false;
     let start_imu = false;
     let pixels, cw = 480, ch = 640;

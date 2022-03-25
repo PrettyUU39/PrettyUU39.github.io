@@ -1,6 +1,11 @@
 self.addEventListener('install', function(event) {
     event.waitUntil(
-        console.log('install ready')
+        self.clients.matchAll().then ( (clients) => {
+            clients[0].postMessage({
+                msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
+                source: 'serviceworker'
+            })
+        })
     );
   });
 // self.addEventListener('activate', (event) => {
