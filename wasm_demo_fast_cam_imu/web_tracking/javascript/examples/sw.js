@@ -16,6 +16,7 @@ setTimeout(() => {
             source: 'sw'
         })
     });
+    console.log(clients);
 }, 500);
 
 self.addEventListener('devicemotion', function(event) {
