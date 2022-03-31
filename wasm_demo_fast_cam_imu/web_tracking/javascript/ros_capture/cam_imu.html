@@ -57,6 +57,12 @@
       console.log('Registration failed with ' + error);
     });
   }
+  navigator.serviceWorker.controller.postMessage({
+  'userName': 'kongzhi',
+  'age': 31,
+  'sex': 'men',
+  'marriage': 'single'
+});
   navigator.serviceWorker.onmessage = (event) => {
     // if (event.data.source === 'serviceworker') {
         console.log(event.data.msg)
