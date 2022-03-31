@@ -12,8 +12,7 @@
   </header>
   <div id="statsContainer"></div>
   <button id="webcamButton" onclick="webcamToggle()">Switch to Webcam</button>
-  <canvas id="c" width="720" height="486"></canvas>
-  <video playsinline id="v" loop autoplay style="display:none;" src="video/chenjing_beijing.mp4"
+  <video playsinline id="v" loop autoplay src="video/chenjing_beijing.mp4"
     type="video/mp4"></video>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
@@ -53,14 +52,14 @@
       accelscope.start();
     };
     var constraints = { video: { facingMode: "environment", width: 640, height: 480, frameRate: { ideal: 20 } }, audio: false };
+    let vid = document.querySelector('video');
     function webcamToggle() {
         navigator.mediaDevices.getUserMedia(constraints)
           .then((stream) => {
             vid.srcObject = stream;
-            let videoTracks = stream.getVideoTracks();
-            if (videoTracks.length) {
-              videoTrack = videoTracks[0];
-            }
+            video.onloadedmetadata = function(e) {
+                video.play();
+            };
           })
           .catch(function (err) {
             alert(err.name);
