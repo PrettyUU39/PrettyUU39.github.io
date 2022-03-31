@@ -26,12 +26,6 @@ self.addEventListener('devicemotion', function(event) {
                   Frequency: ${gyro_hz.toFixed(3)} Hz
                   Data: ${event.acceleration.x.toFixed(3)}, ${event.acceleration.y.toFixed(3)}, ${event.acceleration.z.toFixed(3)}`;
                   console.log(event.acceleration.x)
-                //   self.clients.matchAll().then ( (clients) => {
-                //     clients[0].postMessage({
-                //         msg: event.acceleration.x,
-                //         source: 'sw'
-                //     })
-                // })
     } else {
       gyro_timestamp_start = performance.now();
     }
