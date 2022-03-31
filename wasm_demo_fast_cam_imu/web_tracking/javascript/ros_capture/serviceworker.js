@@ -1,32 +1,21 @@
+self.addEventListener('install', function(event) {
+    event.waitUntil(self.skipWaiting()); // Activate worker immediately
+});
+
+self.addEventListener('activate', function(event) {
+    event.waitUntil(self.clients.claim()); // Become available to all pages
+});
+
 self.addEventListener("message",function(event){
     console.log(event.data);
 });
-console.log('yes')
-// self.addEventListener('install', function(event) {
-//     event.waitUntil(
-//         self.clients.matchAll().then ( (clients) => {
-//             clients[0].postMessage({
-//                 msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
-//                 source: 'serviceworker'
-//             })
-//         })
-//     );
-//   });
-// self.addEventListener('activate', (event) => {
-//     event.waitUntil(
-//         self.clients.matchAll().then ( (clients) => {
-//             clients[0].postMessage({
-//                 msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
-//                 source: 'serviceworker'
-//             })
-//         })
-//     )
-// })
+
 self.clients.matchAll().then ( (clients) => {
     clients[0].postMessage({
         msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
         source: 'serviceworker'
     })
+    console.log(clients);
 })
   self.addEventListener('devicemotion', function(event) {
     gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
