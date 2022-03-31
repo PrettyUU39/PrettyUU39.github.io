@@ -11,12 +11,12 @@ self.addEventListener("message",function(event){
 });
 setTimeout(() => {
     self.clients.matchAll().then ( (clients) => {
+        console.log(clients);
         clients[0].postMessage({
             msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
             source: 'sw'
         })
     });
-    console.log(clients);
 }, 500);
 
 self.addEventListener('devicemotion', function(event) {
