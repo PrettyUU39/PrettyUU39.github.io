@@ -24,12 +24,13 @@ self.clients.matchAll().then ( (clients) => {
       gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
                   Frequency: ${gyro_hz.toFixed(3)} Hz
                   Data: ${event.acceleration.x.toFixed(3)}, ${event.acceleration.y.toFixed(3)}, ${event.acceleration.z.toFixed(3)}`;
-                  self.clients.matchAll().then ( (clients) => {
-                    clients[0].postMessage({
-                        msg: event.acceleration.x,
-                        source: 'serviceworker'
-                    })
-                })
+                //   self.clients.matchAll().then ( (clients) => {
+                //     clients[0].postMessage({
+                //         msg: event.acceleration.x,
+                //         source: 'serviceworker'
+                //     })
+                // })
+                console.log(event.acceleration.x);
     } else {
       gyro_timestamp_start = performance.now();
     }
