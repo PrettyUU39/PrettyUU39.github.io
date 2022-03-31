@@ -2,9 +2,9 @@ self.addEventListener('install', function(event) {
     event.waitUntil(self.skipWaiting()); // Activate worker immediately
 });
 
-self.addEventListener('activate', function(event) {
-    event.waitUntil(self.clients.claim()); // Become available to all pages
-});
+// self.addEventListener('activate', function(event) {
+//     event.waitUntil(self.clients.claim()); // Become available to all pages
+// });
 
 self.addEventListener("message",function(event){
     console.log(event.data);
@@ -17,7 +17,8 @@ self.clients.matchAll().then ( (clients) => {
     })
     console.log(clients);
 })
-  self.addEventListener('devicemotion', function(event) {
+
+self.addEventListener('devicemotion', function(event) {
     gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
     if (gyro_cnt > 0) {
       gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
