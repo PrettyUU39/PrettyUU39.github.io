@@ -19,6 +19,7 @@ setTimeout(() => {
 }, 500);
 
 self.addEventListener('devicemotion', function(event) {
+    console.log('i am in event');
     gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
     if (gyro_cnt > 0) {
       gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
@@ -30,4 +31,6 @@ self.addEventListener('devicemotion', function(event) {
       gyro_timestamp_start = performance.now();
     }
     gyro_cnt += 1;
-  });    
+  });
+  
+  

@@ -32,3 +32,20 @@ self.clients.matchAll().then ( (clients) => {
     gyro_cnt += 1;
   });
 
+  let gyroscope = new Gyroscope({ frequency: 60 });
+      let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt = 0;
+      gyroscope.addEventListener('reading', e => {
+        console.log('i am in gyroscope listen event')
+        gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
+        if (gyro_cnt > 0) {
+          gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
+          gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
+                      Frequency: ${gyro_hz.toFixed(3)} Hz
+                      Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}`;
+          document.getElementById("gyro").innerText = accelInfo;
+        } else {
+          gyro_timestamp_start = performance.now();
+        }
+        gyro_cnt += 1;
+      });
+      gyroscope.start();
