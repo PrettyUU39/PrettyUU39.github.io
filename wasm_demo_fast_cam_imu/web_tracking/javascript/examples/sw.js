@@ -20,14 +20,19 @@ setTimeout(() => {
 }, 500);
 
 self.addEventListener('devicemotion', function(event) {
-    console.log('i am in event');
+    self.clients.matchAll().then ( (clients) => {
+        console.log(clients);
+        clients[0].postMessage({
+            msg: 'i am in devicemotion event',
+            source: 'sw'
+        })
+    });
     gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
     if (gyro_cnt > 0) {
       gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
       gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
                   Frequency: ${gyro_hz.toFixed(3)} Hz
                   Data: ${event.acceleration.x.toFixed(3)}, ${event.acceleration.y.toFixed(3)}, ${event.acceleration.z.toFixed(3)}`;
-                  console.log(event.acceleration.x)
     } else {
       gyro_timestamp_start = performance.now();
     }
