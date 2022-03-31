@@ -1,0 +1,72 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="Stylesheet" href="style.css" type="text/css">
+  <title>Web Tracking Example</title>
+</head>
+
+<body>
+  <header>
+    <h1>Web Tracking Example</h1>
+  </header>
+  <div id="statsContainer"></div>
+  <button id="webcamButton" onclick="webcamToggle()">Switch to Webcam</button>
+  <canvas id="c" width="720" height="486"></canvas>
+  <video playsinline id="v" loop autoplay style="display:none;" src="video/chenjing_beijing.mp4"
+    type="video/mp4"></video>
+  <script src="../dist/wasm/umd/index.js"></script>
+  <script>
+      function gyroInit() {
+      let gyroscope = new Gyroscope({ frequency: 60 });
+      let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt = 0;
+      gyroscope.addEventListener('reading', e => {
+        gyro_timestamp = (performance.now() + performance.timeOrigin) / 1000;
+        if (gyro_cnt > 0) {
+          gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
+          gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)} ms
+                      Frequency: ${gyro_hz.toFixed(3)} Hz
+                      Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}`;
+                      console.log(gyro_hz);
+        } else {
+          gyro_timestamp_start = performance.now();
+        }
+        gyro_cnt += 1;
+      });
+      gyroscope.start();
+    };
+    function accelInit() {
+      let accelscope = new Accelerometer({ frequency: 60 });
+      let accel_timestamp_start, accel_timestamp, accel_hz, accel_cnt = 0;
+      accelscope.addEventListener('reading', e => {
+        accel_timestamp = (performance.now() + performance.timeOrigin) / 1000;
+        if (accel_cnt > 0) {
+          accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
+          accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(6)} ms
+                      Frequency: ${accel_hz.toFixed(3)} Hz
+                      Data: ${accelscope.x.toFixed(3)}, ${accelscope.y.toFixed(3)}, ${accelscope.z.toFixed(3)}`;
+        } else {
+          accel_timestamp_start = performance.now();
+        }
+        accel_cnt += 1;
+      });
+      accelscope.start();
+    };
+    var constraints = { video: { facingMode: "environment", width: 640, height: 480, frameRate: { ideal: 20 } }, audio: false };
+    function webcamToggle() {
+        navigator.mediaDevices.getUserMedia(constraints)
+          .then((stream) => {
+            vid.srcObject = stream;
+            let videoTracks = stream.getVideoTracks();
+            if (videoTracks.length) {
+              videoTrack = videoTracks[0];
+            }
+          })
+          .catch(function (err) {
+            alert(err.name);
+          });
+      };
+      accelInit();
+      gyroInit();
+  </script>
+</body>
