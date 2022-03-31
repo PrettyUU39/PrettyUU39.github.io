@@ -1,26 +1,27 @@
 self.addEventListener("message",function(event){
     console.log(event.data);
 });
-self.addEventListener('install', function(event) {
-    event.waitUntil(
-        self.clients.matchAll().then ( (clients) => {
-            clients[0].postMessage({
-                msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
-                source: 'serviceworker'
-            })
-        })
-    );
-  });
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        self.clients.matchAll().then ( (clients) => {
-            clients[0].postMessage({
-                msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
-                source: 'serviceworker'
-            })
-        })
-    )
-})
+console.log('yes')
+// self.addEventListener('install', function(event) {
+//     event.waitUntil(
+//         self.clients.matchAll().then ( (clients) => {
+//             clients[0].postMessage({
+//                 msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
+//                 source: 'serviceworker'
+//             })
+//         })
+//     );
+//   });
+// self.addEventListener('activate', (event) => {
+//     event.waitUntil(
+//         self.clients.matchAll().then ( (clients) => {
+//             clients[0].postMessage({
+//                 msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
+//                 source: 'serviceworker'
+//             })
+//         })
+//     )
+// })
 self.clients.matchAll().then ( (clients) => {
     clients[0].postMessage({
         msg: 'Hey, from service worker! I\'m listening to your fetch requests.',
