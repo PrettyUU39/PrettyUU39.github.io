@@ -44,28 +44,6 @@
   </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
-  //   if ('serviceWorker' in navigator) {
-  //   navigator.serviceWorker.register('/wasm_demo_fast_cam_imu/web_tracking/javascript/examples/sw.js').then(function(reg) {
-  //     // registration worked
-  //     console.log('Registration succeeded. Scope is ' + reg.scope);
-  //     reg.onupdatefound = function() {
-  //         const newSw = reg.installing;
-  //         newSw.onstatechange = function() {
-  //           if (newSw.state === 'installed') {
-  //             console.log('installed')
-  //           }
-  //         };
-  //       };
-  //   }).catch(function(error) {
-  //     // registration failed
-  //     console.log('Registration failed with ' + error);
-  //   });
-  // }
-  // navigator.serviceWorker.onmessage = (event) => {
-  //   // if (event.data.source === 'serviceworker') {
-  //       console.log(1)
-  //   // }
-  //  }
     let media = 'video';
     let t0, t1 = Infinity, sum = 0, line, perf = 0, perfStr, avg, wasmStats;
     let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
