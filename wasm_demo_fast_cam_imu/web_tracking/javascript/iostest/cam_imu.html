@@ -57,7 +57,7 @@
     var accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt=0;
     let imu_frequency = 60;
 
-    requestDeviceOrientationEventAccess = async (e) => {
+    async function requestDeviceOrientationEventAccess(){
     if (DeviceOrientationEvent.requestPermission) {
       const res = await DeviceOrientationEvent.requestPermission();
       if (res === 'granted') {
