@@ -12,6 +12,7 @@
   </header>
   <div id="statsContainer"></div>
   <button id="capture" onclick="capture()">start capturing</button>
+  <button id="capture" onclick="requestDeviceOrientationEventAccess()">start imu</button>
   <p id="img"></p>
   <p id="imu"></p>
   <p id="gyro"></p>
@@ -56,7 +57,7 @@
     var accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt=0;
     let imu_frequency = 60;
 
-    window.requestDeviceOrientationEventAccess = async (e) => {
+    requestDeviceOrientationEventAccess = async (e) => {
     if (DeviceOrientationEvent.requestPermission) {
       const res = await DeviceOrientationEvent.requestPermission();
       if (res === 'granted') {
@@ -162,7 +163,6 @@
 
     var constraints = { video: { facingMode: "environment", frameRate: { ideal: image_frequency } }, audio: false };
     function capture() {
-      requestDeviceOrientationEventAccess();
       document.getElementById("stats").innerText = `working`;
       if (!start_img) {
         start_img = true;
