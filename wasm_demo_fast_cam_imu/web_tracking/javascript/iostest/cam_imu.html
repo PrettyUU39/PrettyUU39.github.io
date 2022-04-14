@@ -48,6 +48,7 @@
   </script>
   <script type="module">
     // Import the objects you need.
+    // export {requestDeviceOrientationEventAccess};
     import {
       Gyroscope, Accelerometer
     } from '../thirdparty/motion-sensors.js';
@@ -55,7 +56,7 @@
     var accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt=0;
     let imu_frequency = 60;
 
-    const requestDeviceOrientationEventAccess = async (e) => {
+    export const requestDeviceOrientationEventAccess = async (e) => {
     if (DeviceOrientationEvent.requestPermission) {
       const res = await DeviceOrientationEvent.requestPermission();
       if (res === 'granted') {
