@@ -1,0 +1,112 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="Stylesheet" href="style.css" type="text/css">
+  <title>IMU Example</title>
+</head>
+<button id="capture" onclick="capture()">start capturing</button>
+<body>
+  <header><h1>IMU Example</h1></header>
+  <p id="gyro"></p>
+  <p id="accel"></p>
+  <p id="imu"></p>
+  <script src="https://cdn.bootcss.com/vConsole/3.2.0/vconsole.min.js" crossorigin></script>
+  <script>let vConsole = new VConsole();</script>
+  <script src="../thirdparty/roslib.min.js"></script>
+  <script>
+    // setup connection to the ROS server and prepare the topic
+    var ros = new ROSLIB.Ros();
+    ros.on('connection', function() { console.log('Connected to websocket server.');});
+    ros.on('error', function(error) { console.log('Error connecting to websocket server: ', error); window.alert('Error connecting to websocket server'); });
+    ros.on('close', function() { console.log('Connection to websocket server closed.');});
+    var imuTopic = new ROSLIB.Topic({
+      ros : ros,
+      name : '/mobile/imu',
+      messageType : 'sensor_msgs/Imu'
+    });
+  </script>
+  <script type="module">
+    // Import the objects you need.
+    import {
+      Gyroscope, Accelerometer
+    } from '../thirdparty/motion-sensors.js';
+
+    let is_capturing = false;
+    let timestamp_diff = 0;
+    let imu_frequency = 60;
+
+    let gyroscope = new Gyroscope({frequency: imu_frequency});
+    let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
+    gyroscope.addEventListener('reading', e => {
+      // gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      gyro_timestamp = gyroscope.timestamp / 1000;
+      if (gyro_cnt > 0) {
+        gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
+        let gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)}
+                    Frequency: ${gyro_hz.toFixed(3)} Hz
+                    Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}\n`;
+        document.getElementById("gyro").innerText = gyroInfo;
+      } else {
+        gyro_timestamp_start = performance.now();
+      }
+      gyro_cnt += 1;
+    });
+
+    let accelerometer = new Accelerometer({frequency: imu_frequency});
+    let accel_timestamp_start, accel_timestamp, accel_hz, accel_cnt=0;
+    accelerometer.addEventListener('reading', e => {
+      // accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      accel_timestamp = accelerometer.timestamp / 1000;
+      if (accel_cnt > 0) {
+        accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
+        let accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(6)}
+                    Frequency: ${accel_hz.toFixed(3)} Hz
+                    Data: ${accelerometer.x.toFixed(3)}, ${accelerometer.y.toFixed(3)}, ${accelerometer.z.toFixed(3)}\n
+                    Norm: ${Math.sqrt((accelerometer.x*accelerometer.x)+(accelerometer.y*accelerometer.y)+(accelerometer.z*accelerometer.z))}`;
+        document.getElementById("accel").innerText = accelInfo;
+        
+        timestamp_diff = gyro_timestamp - accel_timestamp;
+        document.getElementById("imu").innerText = `Diff Timestamp: ${timestamp_diff.toFixed(6)} s`;
+        let ros_secs = Math.floor(accel_timestamp);
+        let ros_nsecs = Math.round(1000000000*(accel_timestamp-ros_secs));
+        var imuMessage = new ROSLIB.Message({
+          header : {
+            stamp : {secs : ros_secs, nsecs : ros_nsecs},
+            frame_id : ""
+          },
+          angular_velocity : {
+             x : gyroscope.x,
+             y : gyroscope.y,
+             z : gyroscope.z,
+          },
+          linear_acceleration : {
+             x : accelerometer.x,
+             y : accelerometer.y,
+             z : accelerometer.z,
+          },
+        });
+        imuTopic.publish(imuMessage);
+
+      } else {
+        accel_timestamp_start = performance.now();
+      }
+      accel_cnt += 1;
+    });
+
+    function capture() {
+      if(!is_capturing) {
+          ros.connect("wss://" + window.location.hostname + ":9090");
+          gyroscope.start();
+          accelerometer.start();
+          document.getElementById('capture').innerHTML = 'stop capturing';
+          is_capturing = true;
+      } else {
+          ros.close();
+          document.getElementById('capture').innerHTML = 'start capturing';
+          is_capturing = false;
+      }
+    }
+    window.capture = capture;
+  </script>
+</body>
+</html>

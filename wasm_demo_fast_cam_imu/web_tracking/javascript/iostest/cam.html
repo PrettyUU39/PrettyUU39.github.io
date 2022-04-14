@@ -13,10 +13,8 @@
   <div id="statsContainer"></div>
   <button id="capture" onclick="capture()">start capturing</button>
   <p id="img"></p>
-  <p id="imu"></p>
-  <p id="gyro"></p>
-  <p id="accel"></p>
   <p id="stats">Loading..</p>
+  <input type="range" hidden />
   <div id='editor'>
     <div id='middle-col'>
       <canvas id="c" width="480" height="640"></canvas>
@@ -40,23 +38,12 @@
       name : '/mobile/image/compressed',
       messageType : 'sensor_msgs/CompressedImage'
     });
-    var imuTopic = new ROSLIB.Topic({
-      ros : ros,
-      name : '/mobile/imu',
-      messageType : 'sensor_msgs/Imu'
-    });
   </script>
   <script src="../dist/wasm/umd/index.js"></script>
-  <script type="module">
-    // Import the objects you need.
-    import {
-      Gyroscope,
-      AbsoluteOrientationSensor
-    } from '../iostest/motion-sensors.js';
-    </script>
   <script>
-    let start_img = false;
-    let start_imu = false;
+    let start = false;
+    let t0, t1 = Infinity, sum = 0, line, perf = 0, perfStr, avg, wasmStats;
+    let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
     let pixels, cw = 480, ch = 640;
     let dpixels;//record the result of detectfastcorner of one pixels
     let imgInfo, gyroInfo, accelInfo;
@@ -64,7 +51,7 @@
     let img_processor;
     let imgproc_HEAPU8;
     let oldpixels_mem, newpixels_mem;
-    let cam_interval;
+    let last_video_time = 0;
 
     function sleep(time) {
       return new Promise((resolve) => setTimeout(resolve, time));
@@ -85,10 +72,10 @@
       })
     })();
 
-    var constraints = { video: { facingMode: "environment", frameRate: { ideal: 20 } }, audio: false };
+    var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10 } }, audio: false };
     function capture() {
-      if (!start_img) {
-        start_img = true;
+      if (!start) {
+        start = true;
         document.getElementById('capture').innerHTML = 'stop capturing';
         navigator.mediaDevices.getUserMedia(constraints)
           .then((stream) => {
@@ -108,14 +95,34 @@
                 console.log("value " + track.getSettings().focusDistance);
                 vid.play();
               })
+              // const input = document.querySelector('input[type="range"]');
+              // input.min = capabilities.focusDistance.min;
+              // input.max = capabilities.focusDistance.max;
+              // input.step = capabilities.focusDistance.step;
+              // input.value = track.getSettings().focusDistance;
+              // console.log("min " + capabilities.focusDistance.min);
+              // console.log("max " + capabilities.focusDistance.max);
+              // console.log("step " + capabilities.focusDistance.step);
+              // console.log("value " + track.getSettings().focusDistance);
+
+              // input.oninput = function(event) {
+              //   track.applyConstraints({
+              //     advanced: [{
+              //       focusMode: "manual",
+              //       focusDistance: event.target.value
+              //     }]
+              //   });
+              //   sleep(200).then(() => {
+              //     document.getElementById("stats").innerText = event.target.value;
+              //   })
+              // };
+              // input.hidden = false;
             } else {
               alert("no focusDistance support!");
             }
             ros.connect("wss://" + window.location.hostname + ":9090");
             sleep(500).then(() => {
-              // capture_imu();
-              draw();
-              capture_imu();
+              requestAnimationFrame(draw);
             })
           })
           .catch(function (err) {
@@ -124,89 +131,12 @@
           });
       }
       else {
-        start_img = false;
-        // ros.close();
+        start = false;
+        ros.close();
         document.getElementById('capture').innerHTML = 'start capturing';
         vid.srcObject = null;
       }
     }
-
-    let is_capturing = false;
-    let timestamp_diff = 0;
-    let imu_frequency = 60;
-
-    let gyroscope = new Gyroscope({frequency: imu_frequency});
-    let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
-    gyroscope.addEventListener('reading', e => {
-      // gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
-      gyro_timestamp = gyroscope.timestamp / 1000;
-      if (gyro_cnt > 0) {
-        gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
-        let gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(6)}
-                    Frequency: ${gyro_hz.toFixed(3)} Hz
-                    Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}\n`;
-        document.getElementById("gyro").innerText = gyroInfo;
-      } else {
-        gyro_timestamp_start = performance.now();
-      }
-      gyro_cnt += 1;
-    });
-
-    let accelerometer = new Accelerometer({frequency: imu_frequency});
-    let accel_timestamp_start, accel_timestamp, accel_hz, accel_cnt=0;
-    accelerometer.addEventListener('reading', e => {
-      // accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
-      accel_timestamp = accelerometer.timestamp / 1000;
-      if (accel_cnt > 0) {
-        accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
-        let accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(6)}
-                    Frequency: ${accel_hz.toFixed(3)} Hz
-                    Data: ${accelerometer.x.toFixed(3)}, ${accelerometer.y.toFixed(3)}, ${accelerometer.z.toFixed(3)}\n
-                    Norm: ${Math.sqrt((accelerometer.x*accelerometer.x)+(accelerometer.y*accelerometer.y)+(accelerometer.z*accelerometer.z))}`;
-        document.getElementById("accel").innerText = accelInfo;
-        
-        timestamp_diff = gyro_timestamp - accel_timestamp;
-        document.getElementById("imu").innerText = `Diff Timestamp: ${timestamp_diff.toFixed(6)} s`;
-        let ros_secs = Math.floor(accel_timestamp);
-        let ros_nsecs = Math.round(1000000000*(accel_timestamp-ros_secs));
-        var imuMessage = new ROSLIB.Message({
-          header : {
-            stamp : {secs : ros_secs, nsecs : ros_nsecs},
-            frame_id : ""
-          },
-          angular_velocity : {
-             x : gyroscope.x,
-             y : gyroscope.y,
-             z : gyroscope.z,
-          },
-          linear_acceleration : {
-             x : accelerometer.x,
-             y : accelerometer.y,
-             z : accelerometer.z,
-          },
-        });
-        imuTopic.publish(imuMessage);
-
-      } else {
-        accel_timestamp_start = performance.now();
-      }
-      accel_cnt += 1;
-    });
-
-    function capture() {
-      if(!is_capturing) {
-          ros.connect("wss://" + window.location.hostname + ":9090");
-          gyroscope.start();
-          accelerometer.start();
-          document.getElementById('capture').innerHTML = 'stop capturing';
-          is_capturing = true;
-      } else {
-          ros.close();
-          document.getElementById('capture').innerHTML = 'start capturing';
-          is_capturing = false;
-      }
-    }
-    window.capture = capture;
 
     function detectrepeat() {
       let flag;
@@ -223,23 +153,22 @@
       return flag;
     }
 
-    let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
     function draw() {
-      context.drawImage(vid, 0, 0);
-      image_timestamp = (performance.now() + performance.timeOrigin) / 1000;
-      let ros_secs = Math.floor(image_timestamp);
-      let ros_nsecs = Math.round(1000000000*(image_timestamp-ros_secs));
-      pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-      if (!detectrepeat()) {
+      if (vid.currentTime > last_video_time) {
+        last_video_time  = vid.currentTime;
+        context.drawImage(vid, 0, 0);
         if (image_cnt > 0) {
           fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
-          imgInfo = `Image Timestamp: ${image_timestamp.toFixed(3)}
+          imgInfo = `Image Timestamp: ${last_video_time.toFixed(3)}
                       Frequency: ${fps.toFixed(3)} Hz\n`;
           document.getElementById("img").innerText = imgInfo;
         } else {
           image_timestamp_start = performance.now();
         }
         image_cnt += 1;
+        let ros_secs = Math.floor(last_video_time);
+        let ros_nsecs = Math.round(1000000000*(last_video_time-ros_secs));
+        pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
         jpeg_data = canvas.toDataURL('image/jpeg');
         var imageMessage = new ROSLIB.Message({
             header : {
@@ -265,7 +194,6 @@
         document.getElementById('statsContainer').innerHTML = `<h3 style="color:#a37c6e;">\u2639 WebAssembly is not supported in your browser. Please update to the latest version of Chrome or Firefox to enable WebAssembly</h3>`
       }
     }
-
   </script>
 </body>
 
