@@ -1,0 +1,258 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="Stylesheet" href="../examples/style.css" type="text/css">
+  <title>VIO on H5 [Ver.1.0]  DeepMirror</title>
+</head>
+
+<body>
+  <header>
+    <h1>VIO on H5 [Ver.1.0]  DeepMirror</h1>
+  </header>
+  <div id="statsContainer"></div>
+  <button id="capture" onclick="capture()">start capturing</button>
+  <p id="img"></p>
+  <p id="imu"></p>
+  <p id="gyro"></p>
+  <p id="accel"></p>
+  <p id="stats">Loading..</p>
+  <div id='editor'>
+    <div id='middle-col'>
+      <canvas id="c" width="480" height="640"></canvas>
+      <video playsinline id="v" style="display:none;"></video>
+    </div>
+  </div>
+  </br>
+  <script src="https://cdn.bootcss.com/vConsole/3.2.0/vconsole.min.js" crossorigin></script>
+  <script>
+    let vConsole = new VConsole();
+  </script>
+  <script src="../thirdparty/roslib.min.js"></script>
+  <script>
+    // setup connection to the ROS server and prepare the topic
+    var ros = new ROSLIB.Ros();
+    ros.on('connection', function() { console.log('Connected to websocket server.');});
+    ros.on('error', function(error) { console.log('Error connecting to websocket server: ', error); window.alert('Error connecting to websocket server'); });
+    ros.on('close', function() { console.log('Connection to websocket server closed.');});
+    var imageTopic = new ROSLIB.Topic({
+      ros : ros,
+      name : '/mobile/image/compressed',
+      messageType : 'sensor_msgs/CompressedImage'
+    });
+    var imuTopic = new ROSLIB.Topic({
+      ros : ros,
+      name : '/mobile/imu',
+      messageType : 'sensor_msgs/Imu'
+    });
+  </script>
+  <script type="module">
+    // Import the objects you need.
+    import {
+      Gyroscope, Accelerometer
+    } from '../thirdparty/motion-sensors.js';
+    let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
+    var accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt=0;
+    let imu_frequency = 60;
+
+    const requestDeviceOrientationEventAccess = async (e) => {
+    if (DeviceOrientationEvent.requestPermission) {
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res === 'granted') {
+        access = true;
+      }
+    } else {
+      access = true;
+    }
+    if(access){
+    var gyroscope = new Gyroscope({frequency: imu_frequency});
+    gyroscope.addEventListener('reading', e => {
+      // gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      gyro_timestamp = gyroscope.timestamp / 1000;
+      if (gyro_cnt > 0) {
+        gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
+        gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(3)}
+                    Frequency: ${gyro_hz.toFixed(3)} Hz
+                    Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}\n`;
+        document.getElementById("gyro").innerText = gyroInfo;
+      } else {
+        gyro_timestamp_start = performance.now();
+      }
+      gyro_cnt += 1;
+    });
+
+    var accelerometer = new Accelerometer({frequency: imu_frequency});
+    accelerometer.addEventListener('reading', e => {
+      // accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+      accel_timestamp = accelerometer.timestamp / 1000;
+      if (accel_cnt > 0) {
+        accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
+        accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(3)}
+                    Frequency: ${accel_hz.toFixed(3)} Hz
+                    Data: ${accelerometer.x.toFixed(3)}, ${accelerometer.y.toFixed(3)}, ${accelerometer.z.toFixed(3)}\n`;
+        document.getElementById("accel").innerText = accelInfo;
+
+        let timestamp_diff = gyro_timestamp - accel_timestamp;
+        document.getElementById("imu").innerText = `Diff Timestamp: ${timestamp_diff.toFixed(6)} s`;
+        let ros_secs = Math.floor(accel_timestamp);
+        let ros_nsecs = Math.round(1000000000*(accel_timestamp-ros_secs));
+        var imuMessage = new ROSLIB.Message({
+          header : {
+            stamp : {secs : ros_secs, nsecs : ros_nsecs},
+            frame_id : ""
+          },
+          angular_velocity : {
+             x : gyroscope.x,
+             y : gyroscope.y,
+             z : gyroscope.z,
+          },
+          linear_acceleration : {
+             x : accelerometer.x,
+             y : accelerometer.y,
+             z : accelerometer.z,
+          },
+        });
+        imuTopic.publish(imuMessage);
+      } else {
+        accel_timestamp_start = performance.now();
+      }
+      accel_cnt += 1;
+    });
+
+    gyroscope.start();
+    accelerometer.start();
+  }
+  else{
+    alert("can't get your imu data!");
+  }
+}
+  </script>
+  <script src="../dist/wasm/umd/index.js"></script>
+  <script>
+    let start_img = false;
+    let start_imu = false;
+    let pixels, cw = 480, ch = 640;
+    let dpixels;//record the result of detectfastcorner of one pixels
+    let imgInfo, gyroInfo, accelInfo;
+    let web_tracking_module;
+    let img_processor;
+    let imgproc_HEAPU8;
+    let last_video_time = 0;
+    let image_frequency = 20;
+    let time_offset = 0;
+
+    function sleep(time) {
+      return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+    //wasm video
+    var vid = document.getElementById('v');
+    var canvas = document.getElementById('c');
+    var context = canvas.getContext('2d');
+    (async () => {
+      // Wait for the library to initialize
+      web_tracking_module = await WebTracking();
+      sleep(200).then(() => {
+        appendWasmCheck();
+        img_processor = web_tracking_module.ImgProc.getImgProcessor(cw, ch, cw);
+        imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
+      })
+    })();
+
+    var constraints = { video: { facingMode: "environment", frameRate: { ideal: image_frequency } }, audio: false };
+    function capture() {
+      requestDeviceOrientationEventAccess();
+      document.getElementById("stats").innerText = `working`;
+      if (!start_img) {
+        start_img = true;
+        document.getElementById('capture').innerHTML = 'stop capturing';
+        navigator.mediaDevices.getUserMedia(constraints)
+          .then((stream) => {
+            vid.srcObject = stream;
+            const track = stream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities();
+            // Check whether focus distance is supported or not.
+            if (capabilities.focusDistance) {
+              console.log("value " + track.getSettings().focusDistance);
+              track.applyConstraints({
+                  advanced: [{
+                    focusMode: "manual",
+                    focusDistance: 1.8
+                  }]
+              });
+              sleep(200).then(() => {
+                console.log("value " + track.getSettings().focusDistance);
+                vid.play();
+              })
+            } else {
+              alert("no focusDistance support!");
+              vid.play();
+            }
+            ros.connect("wss://" + window.location.hostname + ":9090");
+            sleep(500).then(() => {
+              draw();
+            })
+          })
+          .catch(function (err) {
+            media = 'video';
+            alert(err.name);
+          });
+      }
+      else {
+        start_img = false;
+        // ros.close();
+        document.getElementById('capture').innerHTML = 'start capturing';
+        vid.srcObject = null;
+      }
+    }
+
+    let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
+    function draw() {
+      if (vid.currentTime + time_offset > last_video_time) {
+        // if (time_offset == 0 && accel_timestamp > 0) {
+        //   time_offset = accel_timestamp - vid.currentTime;
+        // }
+        last_video_time  = vid.currentTime + time_offset;
+        context.drawImage(vid, 0, 0);
+        if (image_cnt > 0) {
+          fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
+          imgInfo = `Image Timestamp: ${last_video_time.toFixed(3)}
+                      Frequency: ${fps.toFixed(3)} Hz\n`;
+          document.getElementById("img").innerText = imgInfo;
+        } else {
+          image_timestamp_start = performance.now();
+        }
+        image_cnt += 1;
+        let ros_secs = Math.floor(last_video_time);
+        let ros_nsecs = Math.round(1000000000*(last_video_time-ros_secs));
+        pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+        jpeg_data = canvas.toDataURL('image/jpeg');
+        var imageMessage = new ROSLIB.Message({
+            header : {
+              stamp : {secs : ros_secs, nsecs : ros_nsecs},
+              frame_id : ''
+            },
+            format : "jpeg",
+            data : jpeg_data.replace("data:image/jpeg;base64,", "")
+        });
+        imageTopic.publish(imageMessage);
+      }
+      requestAnimationFrame(draw);
+    }
+
+    function appendWasmCheck() {
+      if ('WebAssembly' in window) {
+        document.getElementById('statsContainer').innerHTML = `(\u2713 WebAssembly is supported in your browser)`
+      }
+      else if (/Mobi/.test(navigator.userAgent)) {
+        document.getElementById('statsContainer').innerHTML = `<h3 style="color:#a37c6e;">\u2639 WebAssembly is not yet supported on mobile devices. Please view on desktop browser.</h3>`
+      }
+      else {
+        document.getElementById('statsContainer').innerHTML = `<h3 style="color:#a37c6e;">\u2639 WebAssembly is not supported in your browser. Please update to the latest version of Chrome or Firefox to enable WebAssembly</h3>`
+      }
+    }
+
+  </script>
+</body>
+
+</html>
