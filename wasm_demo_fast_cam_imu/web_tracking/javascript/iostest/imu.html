@@ -46,6 +46,7 @@
                     Frequency: ${gyro_hz.toFixed(3)} Hz
                     Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}\n`;
         document.getElementById("gyro").innerText = gyroInfo;
+        console.log(gyro_hz);
       } else {
         gyro_timestamp_start = performance.now();
       }
