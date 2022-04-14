@@ -102,6 +102,8 @@
       }
       accel_cnt += 1;
     });
+    gyroscope.start();
+    accelerometer.start();
    }
    else{
      console.log(false)
@@ -112,8 +114,6 @@
       requestDeviceOrientationEventAccess();
       if(!is_capturing) {
           ros.connect("wss://" + window.location.hostname + ":9090");
-          gyroscope.start();
-          accelerometer.start();
           document.getElementById('capture').innerHTML = 'stop capturing';
           is_capturing = true;
       } else {
