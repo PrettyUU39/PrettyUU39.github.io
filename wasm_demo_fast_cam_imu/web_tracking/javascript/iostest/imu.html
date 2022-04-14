@@ -34,7 +34,18 @@
     let is_capturing = false;
     let timestamp_diff = 0;
     let imu_frequency = 60;
+    let access = false;
 
+    const requestDeviceOrientationEventAccess = async (e) => {
+    if (DeviceOrientationEvent.requestPermission) {
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res === 'granted') {
+        access = true;
+      }
+    } else {
+      access = true;
+    }
+    if(access){
     let gyroscope = new Gyroscope({frequency: imu_frequency});
     let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
     gyroscope.addEventListener('reading', e => {
@@ -46,13 +57,11 @@
                     Frequency: ${gyro_hz.toFixed(3)} Hz
                     Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}\n`;
         document.getElementById("gyro").innerText = gyroInfo;
-        console.log(gyro_hz);
       } else {
         gyro_timestamp_start = performance.now();
       }
       gyro_cnt += 1;
     });
-
     let accelerometer = new Accelerometer({frequency: imu_frequency});
     let accel_timestamp_start, accel_timestamp, accel_hz, accel_cnt=0;
     accelerometer.addEventListener('reading', e => {
@@ -93,8 +102,14 @@
       }
       accel_cnt += 1;
     });
+   }
+   else{
+     console.log(false)
+   }
+   };
 
     function capture() {
+      requestDeviceOrientationEventAccess();
       if(!is_capturing) {
           ros.connect("wss://" + window.location.hostname + ":9090");
           gyroscope.start();
