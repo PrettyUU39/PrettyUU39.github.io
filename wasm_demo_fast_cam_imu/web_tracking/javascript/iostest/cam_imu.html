@@ -53,8 +53,9 @@
       Gyroscope, Accelerometer
     } from '../thirdparty/motion-sensors.js';
     let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
-    var accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt=0;
+    let accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt=0;
     let imu_frequency = 60;
+    let access = false;
 
     window.requestDeviceOrientationEventAccess = async (e) => {
       console.log('yes');
@@ -67,7 +68,7 @@
       access = true;
     }
     if(access){
-    var gyroscope = new Gyroscope({frequency: imu_frequency});
+    let gyroscope = new Gyroscope({frequency: imu_frequency});
     gyroscope.addEventListener('reading', e => {
       // gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       gyro_timestamp = gyroscope.timestamp / 1000;
@@ -83,7 +84,7 @@
       gyro_cnt += 1;
     });
 
-    var accelerometer = new Accelerometer({frequency: imu_frequency});
+    let accelerometer = new Accelerometer({frequency: imu_frequency});
     accelerometer.addEventListener('reading', e => {
       // accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
       accel_timestamp = accelerometer.timestamp / 1000;
@@ -98,7 +99,7 @@
         document.getElementById("imu").innerText = `Diff Timestamp: ${timestamp_diff.toFixed(6)} s`;
         let ros_secs = Math.floor(accel_timestamp);
         let ros_nsecs = Math.round(1000000000*(accel_timestamp-ros_secs));
-        var imuMessage = new ROSLIB.Message({
+        let imuMessage = new ROSLIB.Message({
           header : {
             stamp : {secs : ros_secs, nsecs : ros_nsecs},
             frame_id : ""
@@ -120,7 +121,6 @@
       }
       accel_cnt += 1;
     });
-
     gyroscope.start();
     accelerometer.start();
   }
