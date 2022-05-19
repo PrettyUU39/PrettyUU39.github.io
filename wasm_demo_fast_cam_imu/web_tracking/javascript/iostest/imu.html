@@ -46,6 +46,9 @@
       access = true;
     }
     if(access){
+      if(window.Gyroscope){
+        console.log("have gyroscope")
+      }
     let gyroscope = new Gyroscope({frequency: imu_frequency});
     let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
     gyroscope.addEventListener('reading', e => {

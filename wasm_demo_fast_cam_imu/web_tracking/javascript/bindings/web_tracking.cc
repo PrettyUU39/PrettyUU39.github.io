@@ -1,7 +1,7 @@
 #include <emscripten/bind.h>
-
 #include "web_tracking/cpp/imgproc.h"
 #include "web_tracking/cpp/matrixproc.h"
+#include "web_tracking/cpp/test.h"
 
 using namespace emscripten;
 using namespace WebTracking;
@@ -16,6 +16,6 @@ EMSCRIPTEN_BINDINGS(Web_Tracking) {
         .constructor<>()
         .class_function("AngleVectorFromRotation", &MatrixProc::AngleVectorFromRotation)
         .class_function("Chi2", &MatrixProc::Chi2);
-
+    emscripten::function("testmain", &testmain);
     register_vector<double>("DoubleVector");
 }

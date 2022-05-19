@@ -29,6 +29,7 @@ cc_binary(
     deps = [
         "//web_tracking/cpp:imgproc",
         "//web_tracking/cpp:matrixproc",
+        "//web_tracking/cpp:test",
     ],
 )
 

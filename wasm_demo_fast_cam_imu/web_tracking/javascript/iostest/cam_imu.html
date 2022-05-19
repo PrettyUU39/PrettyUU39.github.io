@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <link rel="Stylesheet" href="../examples/style.css" type="text/css">
-  <title>VIO on H5 [Ver.1.0]  DeepMirror</title>
+  <title>VIO on H5 [Ver.1.0] DeepMirror</title>
 </head>
 
 <body>
   <header>
-    <h1>VIO on H5 [Ver.1.0]  DeepMirror</h1>
+    <h1>VIO on H5 [Ver.1.0] DeepMirror</h1>
   </header>
   <div id="statsContainer"></div>
   <button id="capture" onclick="capture()">start capturing</button>
@@ -32,18 +32,18 @@
   <script>
     // setup connection to the ROS server and prepare the topic
     var ros = new ROSLIB.Ros();
-    ros.on('connection', function() { console.log('Connected to websocket server.');});
-    ros.on('error', function(error) { console.log('Error connecting to websocket server: ', error); window.alert('Error connecting to websocket server'); });
-    ros.on('close', function() { console.log('Connection to websocket server closed.');});
+    ros.on('connection', function () { console.log('Connected to websocket server.'); });
+    ros.on('error', function (error) { console.log('Error connecting to websocket server: ', error); window.alert('Error connecting to websocket server'); });
+    ros.on('close', function () { console.log('Connection to websocket server closed.'); });
     var imageTopic = new ROSLIB.Topic({
-      ros : ros,
-      name : '/mobile/image/compressed',
-      messageType : 'sensor_msgs/CompressedImage'
+      ros: ros,
+      name: '/mobile/image/compressed',
+      messageType: 'sensor_msgs/CompressedImage'
     });
     var imuTopic = new ROSLIB.Topic({
-      ros : ros,
-      name : '/mobile/imu',
-      messageType : 'sensor_msgs/Imu'
+      ros: ros,
+      name: '/mobile/imu',
+      messageType: 'sensor_msgs/Imu'
     });
   </script>
   <script type="module">
@@ -52,82 +52,82 @@
     import {
       Gyroscope, Accelerometer
     } from '../thirdparty/motion-sensors.js';
-    let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt=0;
-    let accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt=0;
-    let imu_frequency = 60;
+    let gyro_timestamp_start, gyro_timestamp, gyro_hz, gyro_cnt = 0;
+    let accel_timestamp_start, accel_timestamp = 0, accel_hz, accel_cnt = 0;
+    let imu_frequency = 20;
     let access = false;
-
     window.requestDeviceOrientationEventAccess = async (e) => {
       console.log('yes');
-    if (DeviceOrientationEvent.requestPermission) {
-      const res = await DeviceOrientationEvent.requestPermission();
-      if (res === 'granted') {
+      if (DeviceOrientationEvent.requestPermission) {
+        const res = await DeviceOrientationEvent.requestPermission();
+        if (res === 'granted') {
+          access = true;
+        }
+      } else {
         access = true;
       }
-    } else {
-      access = true;
-    }
-    if(access){
-    let gyroscope = new Gyroscope({frequency: imu_frequency});
-    gyroscope.addEventListener('reading', e => {
-      // gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
-      gyro_timestamp = gyroscope.timestamp / 1000;
-      if (gyro_cnt > 0) {
-        gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
-        gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(3)}
+      if (access) {
+        let gyroscope = new Gyroscope({ frequency: 60 });
+        gyroscope.addEventListener('reading', e => {
+          // gyro_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+          gyro_timestamp = gyroscope.timestamp / 1000;
+          if (gyro_cnt > 0) {
+            gyro_hz = 1000 * gyro_cnt / (performance.now() - gyro_timestamp_start);
+            gyroInfo = `Gyro Timestamp: ${gyro_timestamp.toFixed(3)}
                     Frequency: ${gyro_hz.toFixed(3)} Hz
                     Data: ${gyroscope.x.toFixed(3)}, ${gyroscope.y.toFixed(3)}, ${gyroscope.z.toFixed(3)}\n`;
-        document.getElementById("gyro").innerText = gyroInfo;
-      } else {
-        gyro_timestamp_start = performance.now();
-      }
-      gyro_cnt += 1;
-    });
+            document.getElementById("gyro").innerText = gyroInfo;
+          } else {
+            gyro_timestamp_start = performance.now();
+          }
+          gyro_cnt += 1;
+        });
 
-    let accelerometer = new Accelerometer({frequency: imu_frequency});
-    accelerometer.addEventListener('reading', e => {
-      // accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
-      accel_timestamp = accelerometer.timestamp / 1000;
-      if (accel_cnt > 0) {
-        accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
-        accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(3)}
+        let accelerometer = new Accelerometer({ frequency: 60 });
+        accelerometer.addEventListener('reading', e => {
+          // accel_timestamp = (performance.now()+performance.timeOrigin) / 1000;
+          accel_timestamp = accelerometer.timestamp / 1000;
+          window.accel_timestamp = accel_timestamp;
+          if (accel_cnt > 0) {
+            accel_hz = 1000 * accel_cnt / (performance.now() - accel_timestamp_start);
+            accelInfo = `Accel Timestamp: ${accel_timestamp.toFixed(3)}
                     Frequency: ${accel_hz.toFixed(3)} Hz
                     Data: ${accelerometer.x.toFixed(3)}, ${accelerometer.y.toFixed(3)}, ${accelerometer.z.toFixed(3)}\n`;
-        document.getElementById("accel").innerText = accelInfo;
+            document.getElementById("accel").innerText = accelInfo;
 
-        let timestamp_diff = gyro_timestamp - accel_timestamp;
-        document.getElementById("imu").innerText = `Diff Timestamp: ${timestamp_diff.toFixed(6)} s`;
-        let ros_secs = Math.floor(accel_timestamp);
-        let ros_nsecs = Math.round(1000000000*(accel_timestamp-ros_secs));
-        let imuMessage = new ROSLIB.Message({
-          header : {
-            stamp : {secs : ros_secs, nsecs : ros_nsecs},
-            frame_id : ""
-          },
-          angular_velocity : {
-             x : gyroscope.x,
-             y : gyroscope.y,
-             z : gyroscope.z,
-          },
-          linear_acceleration : {
-             x : accelerometer.x,
-             y : accelerometer.y,
-             z : accelerometer.z,
-          },
+            let timestamp_diff = gyro_timestamp - accel_timestamp;
+            document.getElementById("imu").innerText = `Diff Timestamp: ${timestamp_diff.toFixed(6)} s`;
+            let ros_secs = Math.floor(accel_timestamp);
+            let ros_nsecs = Math.round(1000000000 * (accel_timestamp - ros_secs));
+            let imuMessage = new ROSLIB.Message({
+              header: {
+                stamp: { secs: ros_secs, nsecs: ros_nsecs },
+                frame_id: ""
+              },
+              angular_velocity: {
+                x: gyroscope.x,
+                y: gyroscope.y,
+                z: gyroscope.z,
+              },
+              linear_acceleration: {
+                x: accelerometer.x,
+                y: accelerometer.y,
+                z: accelerometer.z,
+              },
+            });
+            imuTopic.publish(imuMessage);
+          } else {
+            accel_timestamp_start = performance.now();
+          }
+          accel_cnt += 1;
         });
-        imuTopic.publish(imuMessage);
-      } else {
-        accel_timestamp_start = performance.now();
+        gyroscope.start();
+        accelerometer.start();
       }
-      accel_cnt += 1;
-    });
-    gyroscope.start();
-    accelerometer.start();
-  }
-  else{
-    alert("can't get your imu data!");
-  }
-}
+      else {
+        alert("can't get your imu data!");
+      }
+    }
   </script>
   <script src="../dist/wasm/umd/index.js"></script>
   <script>
@@ -142,6 +142,7 @@
     let last_video_time = 0;
     let image_frequency = 20;
     let time_offset = 0;
+    let oldpixels_mem, newpixels_mem;
 
     function sleep(time) {
       return new Promise((resolve) => setTimeout(resolve, time));
@@ -158,10 +159,12 @@
         appendWasmCheck();
         img_processor = web_tracking_module.ImgProc.getImgProcessor(cw, ch, cw);
         imgproc_HEAPU8 = web_tracking_module.ImgProc.HEAPU8();
+        web_tracking_module.Test.testmain();
+        alert('yes')
       })
     })();
 
-    var constraints = { video: { facingMode: "environment", frameRate: { ideal: image_frequency } }, audio: false };
+    var constraints = { audio: false, video: { facingMode: "environment", frameRate: { ideal: 60 } } };
     function capture() {
       window.requestDeviceOrientationEventAccess();
       document.getElementById("stats").innerText = `working`;
@@ -177,16 +180,17 @@
             if (capabilities.focusDistance) {
               console.log("value " + track.getSettings().focusDistance);
               track.applyConstraints({
-                  advanced: [{
-                    focusMode: "manual",
-                    focusDistance: 1.8
-                  }]
+                advanced: [{
+                  focusMode: "manual",
+                  focusDistance: 1.8
+                }]
               });
               sleep(200).then(() => {
                 console.log("value " + track.getSettings().focusDistance);
                 vid.play();
               })
             } else {
+              console.log("value " + track.getSettings().frameRate);
               alert("no focusDistance support!");
               vid.play();
             }
@@ -208,37 +212,56 @@
       }
     }
 
+    function detectrepeat() {
+      let flag;
+      const len = pixels.data.length;
+      if(oldpixels_mem === undefined){
+        oldpixels_mem = web_tracking_module.ImgProc.malloc(len);
+        newpixels_mem = web_tracking_module.ImgProc.malloc(len);
+        flag = false;
+      }
+      else{
+        imgproc_HEAPU8.set(pixels.data, newpixels_mem);
+        flag = img_processor.detectRepeated(oldpixels_mem, newpixels_mem, len);
+      }
+      return flag;
+    }
+
+
     let image_timestamp_start, image_timestamp, fps, image_cnt = 0;
     function draw() {
       if (vid.currentTime + time_offset > last_video_time) {
-        // if (time_offset == 0 && accel_timestamp > 0) {
-        //   time_offset = accel_timestamp - vid.currentTime;
-        // }
-        last_video_time  = vid.currentTime + time_offset;
-        context.drawImage(vid, 0, 0);
-        if (image_cnt > 0) {
-          fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
-          imgInfo = `Image Timestamp: ${last_video_time.toFixed(3)}
-                      Frequency: ${fps.toFixed(3)} Hz\n`;
-          document.getElementById("img").innerText = imgInfo;
-        } else {
-          image_timestamp_start = performance.now();
+        if (time_offset == 0 && window.accel_timestamp > 0) {
+          time_offset = window.accel_timestamp - vid.currentTime;
         }
-        image_cnt += 1;
-        let ros_secs = Math.floor(last_video_time);
-        let ros_nsecs = Math.round(1000000000*(last_video_time-ros_secs));
+        last_video_time = vid.currentTime + time_offset;
+        context.drawImage(vid, 0, 0);
         pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
-        jpeg_data = canvas.toDataURL('image/jpeg');
-        var imageMessage = new ROSLIB.Message({
-            header : {
-              stamp : {secs : ros_secs, nsecs : ros_nsecs},
-              frame_id : ''
+        // if (!detectrepeat()) {
+          if (image_cnt > 0) {
+            fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
+            imgInfo = `Image Timestamp: ${last_video_time.toFixed(3)}
+                      Frequency: ${fps.toFixed(3)} Hz\n`;
+            document.getElementById("img").innerText = imgInfo;
+          } else {
+            image_timestamp_start = performance.now();
+          }
+          image_cnt += 1;
+          let ros_secs = Math.floor(last_video_time);
+          let ros_nsecs = Math.round(1000000000 * (last_video_time - ros_secs));
+          // pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+          jpeg_data = canvas.toDataURL('image/jpeg');
+          var imageMessage = new ROSLIB.Message({
+            header: {
+              stamp: { secs: ros_secs, nsecs: ros_nsecs },
+              frame_id: ''
             },
-            format : "jpeg",
-            data : jpeg_data.replace("data:image/jpeg;base64,", "")
-        });
-        imageTopic.publish(imageMessage);
-      }
+            format: "jpeg",
+            data: jpeg_data.replace("data:image/jpeg;base64,", "")
+          });
+          imageTopic.publish(imageMessage);
+        }
+      // }
       requestAnimationFrame(draw);
     }
 

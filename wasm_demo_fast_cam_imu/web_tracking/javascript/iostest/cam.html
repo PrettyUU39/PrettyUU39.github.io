@@ -72,7 +72,7 @@
       })
     })();
 
-    var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10 } }, audio: false };
+    var constraints = { audio: false, video: { facingMode: "environment", frameRate: { ideal: 60 } } };
     function capture() {
       if (!start) {
         start = true;
@@ -95,30 +95,9 @@
                 console.log("value " + track.getSettings().focusDistance);
                 vid.play();
               })
-              // const input = document.querySelector('input[type="range"]');
-              // input.min = capabilities.focusDistance.min;
-              // input.max = capabilities.focusDistance.max;
-              // input.step = capabilities.focusDistance.step;
-              // input.value = track.getSettings().focusDistance;
-              // console.log("min " + capabilities.focusDistance.min);
-              // console.log("max " + capabilities.focusDistance.max);
-              // console.log("step " + capabilities.focusDistance.step);
-              // console.log("value " + track.getSettings().focusDistance);
-
-              // input.oninput = function(event) {
-              //   track.applyConstraints({
-              //     advanced: [{
-              //       focusMode: "manual",
-              //       focusDistance: event.target.value
-              //     }]
-              //   });
-              //   sleep(200).then(() => {
-              //     document.getElementById("stats").innerText = event.target.value;
-              //   })
-              // };
-              // input.hidden = false;
             } else {
               alert("no focusDistance support!");
+              vid.play();
             }
             ros.connect("wss://" + window.location.hostname + ":9090");
             sleep(500).then(() => {
@@ -132,7 +111,7 @@
       }
       else {
         start = false;
-        ros.close();
+        // ros.close();
         document.getElementById('capture').innerHTML = 'start capturing';
         vid.srcObject = null;
       }
@@ -152,11 +131,14 @@
       }
       return flag;
     }
+    
 
     function draw() {
       if (vid.currentTime > last_video_time) {
         last_video_time  = vid.currentTime;
         context.drawImage(vid, 0, 0);
+        pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+        // if (!detectrepeat()) {
         if (image_cnt > 0) {
           fps = 1000 * image_cnt / (performance.now() - image_timestamp_start);
           imgInfo = `Image Timestamp: ${last_video_time.toFixed(3)}
@@ -168,7 +150,7 @@
         image_cnt += 1;
         let ros_secs = Math.floor(last_video_time);
         let ros_nsecs = Math.round(1000000000*(last_video_time-ros_secs));
-        pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
+        // pixels = context.getImageData(0, 0, vid.videoWidth, vid.videoHeight);
         jpeg_data = canvas.toDataURL('image/jpeg');
         var imageMessage = new ROSLIB.Message({
             header : {

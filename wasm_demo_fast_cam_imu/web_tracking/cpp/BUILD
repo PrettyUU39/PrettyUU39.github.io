@@ -15,5 +15,13 @@ cc_library(
     name = "matrixproc",
     srcs = ["matrixproc.cc"],
     hdrs = ["matrixproc.h"],
-    deps = ["@eigen"],
+    deps = ["@eigen"]
+)
+
+cc_library(
+    name = "test",
+    srcs = ["test.cc"],
+    hdrs = ["test.h"],
+    deps = ["@ceres_solver//:ceres",
+    "@com_github_google_glog//:glog"],
 )

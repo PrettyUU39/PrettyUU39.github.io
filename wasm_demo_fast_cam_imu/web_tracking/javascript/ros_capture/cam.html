@@ -71,7 +71,7 @@
       })
     })();
 
-    var constraints = { video: { facingMode: "environment", frameRate: { ideal: 10 } }, audio: false };
+    var constraints = { video: { facingMode: "environment", frameRate: { ideal: 20 } }, audio: false };
     function capture() {
       if (!start) {
         start = true;
@@ -118,6 +118,7 @@
               // input.hidden = false;
             } else {
               alert("no focusDistance support!");
+              vid.play();
             }
             ros.connect("wss://" + window.location.hostname + ":9090");
             sleep(500).then(() => {
